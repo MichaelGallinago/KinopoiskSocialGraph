@@ -61,6 +61,15 @@ class Parser:
                 case Status.FINISH:
                     return status, None
 
+    def get_quota(self):
+        response = requests.get(f'{self.API_URL}v1/api_keys/{self.headers['X-API-KEY']}', headers=self.headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            return max(data["dailyQuota"]["value"] - data["dailyQuota"]["used"], 0)
+        else:
+            return 0
+
 
 class FilmParser(Parser):
     def get_data(self, film_id):

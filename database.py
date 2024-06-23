@@ -3,6 +3,7 @@ from parser import StaffParser
 from parser import FilmParser
 from parser import Status
 import multiprocessing
+import requests
 
 
 class Database:
@@ -27,7 +28,7 @@ class Database:
     @staticmethod
     def _worker(parser, lock, shared_num):
         files = []
-        for i in range(500):
+        for i in range(parser.get_quota()):
             with lock:
                 film_id = shared_num.value
                 shared_num.value += 1
