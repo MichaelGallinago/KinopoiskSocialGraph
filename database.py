@@ -6,7 +6,6 @@ import multiprocessing
 
 
 class Database:
-
     def __init__(self, keys_file_path):
         self.__client = MongoClient('mongodb://localhost:27017/')
         self.__db = self.__client['ksg']
@@ -26,11 +25,11 @@ class Database:
         self.__add_things('staff_id', StaffParser, self.__staff)
 
     @staticmethod
-    def __worker(parser, shared_num, lock, collection):
+    def _worker(database, parser, collection):
         while True:
-            with lock:
-                film_id = shared_num.value
-                shared_num.value += 1
+            with database.lock:
+                film_id = database.shared_num.value
+                database.shared_num.value += 1
 
             status, data = parser.get_data(film_id)
             if status == Status.FINISH:
@@ -45,18 +44,18 @@ class Database:
                 except Exception as e:
                     print(f"Ошибка вставки документа для id={film_id}: {e}")
 
-    @staticmethod
-    def __run_parallel_processing(parsers, shared_num, lock, collection):
+    def __run_parallel_processing(self, parsers, collection):
+        database = self
         with multiprocessing.Pool(processes=len(parsers)) as pool:
-            tasks = [(parser, shared_num, lock, collection) for parser in parsers]
-            results = pool.starmap(Database.__worker, tasks)
+            tasks = [(database, parser, collection) for parser in parsers]
+            results = pool.starmap(self._worker, tasks)
         return results
 
     def __add_things(self, id_name, parser_type, collection):
         progress = self.__progress.find_one()
-        print('Добавление начато на индексе: ' + progress[id_name])
+        print('Добавление начато на индексе: ' + str(progress[id_name]))
         progress[id_name] = self.__run_processing(progress[id_name], parser_type, collection)
-        print('Добавление завершено на индексе: ' + progress[id_name])
+        print('Добавление завершено на индексе: ' + str(progress[id_name]))
         self.__progress.update_one({}, progress)
 
     def __init_collections(self):
@@ -81,10 +80,10 @@ class Database:
             })
 
     def __run_processing(self, initial_num, parser_type, collection):
-        shared_num = multiprocessing.Value('i', initial_num)
-        lock = multiprocessing.Lock()
+        self.shared_num = multiprocessing.Value('i', initial_num)
+        self.lock = multiprocessing.Lock()
 
         parsers = [parser_type(key) for key in self.__api_keys]
-        Database.__run_parallel_processing(parsers, shared_num, lock, collection)
+        self.__run_parallel_processing(parsers, collection)
 
-        return shared_num.value
+        return self.shared_num.value
