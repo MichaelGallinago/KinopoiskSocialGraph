@@ -27,7 +27,7 @@ class Database:
     @staticmethod
     def _worker(parser, lock, shared_num):
         files = []
-        while True:
+        for i in range(500):
             with lock:
                 film_id = shared_num.value
                 shared_num.value += 1
@@ -39,7 +39,9 @@ class Database:
             if data is not None:
                 files.append(data)
 
-    def _run_parallel_processing(self, initial_num, parser_type, collection):
+        return files
+
+    def _run_parallel_processing(self, initial_num, parser_type):
         parsers = [parser_type(key) for key in self.__api_keys]
 
         manager = multiprocessing.Manager()
@@ -48,8 +50,28 @@ class Database:
 
         with multiprocessing.Pool() as pool:
             tasks = [(parser, lock, shared_num) for parser in parsers]
-            files = pool.starmap(Database._worker, tasks)
+            files_list = pool.starmap(Database._worker, tasks)
 
+        return shared_num.value, files_list
+
+    def __add_things(self, id_name, parser_type, collection):
+        progress = self.__progress.find_one()
+        print('Добавление начато на индексе: ' + str(progress[id_name]))
+
+        progress[id_name], files_list = self._run_parallel_processing(progress[id_name], parser_type)
+
+        if len(files_list) > 0:
+            if isinstance(files_list[0], list):
+                for files in files_list:
+                    self.__insert_files(files, collection)
+            else:
+                self.__insert_files(files_list, collection)
+
+        print('Добавление завершено на индексе: ' + str(progress[id_name]))
+        self.__progress.update_one({}, {"$set": progress})
+
+    @staticmethod
+    def __insert_files(files, collection):
         for file in files:
             try:
                 if isinstance(file, list):
@@ -58,15 +80,6 @@ class Database:
                     collection.insert_one(file)
             except Exception as e:
                 print(f"Ошибка вставки документа: {e}")
-
-        return shared_num.value
-
-    def __add_things(self, id_name, parser_type, collection):
-        progress = self.__progress.find_one()
-        print('Добавление начато на индексе: ' + str(progress[id_name]))
-        progress[id_name] = self._run_parallel_processing(progress[id_name], parser_type, collection)
-        print('Добавление завершено на индексе: ' + str(progress[id_name]))
-        self.__progress.update_one({}, {"$set": progress})
 
     def __init_collections(self):
         collection_names = self.__db.list_collection_names()
@@ -84,7 +97,4 @@ class Database:
         progress_exists = 'progress' in collection_names
         self.__progress = self.__db['progress']
         if not progress_exists:
-            self.__progress.insert_one({
-                'films_id': 298,
-                'staff_id': 298
-            })
+            self.__progress.insert_many([{'films_id': 298}, {'staff_id': 298}])
