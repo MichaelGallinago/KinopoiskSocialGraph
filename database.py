@@ -8,22 +8,22 @@ import multiprocessing
 class Database:
 
     def __init__(self, keys_file_path):
-        self.client = MongoClient('mongodb://localhost:27017/')
-        self.db = self.client['ksg']
+        self.__client = MongoClient('mongodb://localhost:27017/')
+        self.__db = self.__client['ksg']
 
         self.__init_collections()
 
         with open(keys_file_path, 'r') as file:
-            self.api_keys = file.readlines()
+            self.__api_keys = file.readlines()
 
     def __del__(self):
-        self.client.close()
+        self.__client.close()
 
     def add_films(self):
-        self.__add_things('films_id', FilmParser, self.films)
+        self.__add_things('films_id', FilmParser, self.__films)
 
     def add_staff(self):
-        self.__add_things('staff_id', StaffParser, self.staff)
+        self.__add_things('staff_id', StaffParser, self.__staff)
 
     @staticmethod
     def __worker(parser, shared_num, lock, collection):
@@ -53,29 +53,29 @@ class Database:
         return results
 
     def __add_things(self, id_name, parser_type, collection):
-        progress = self.progress.find_one()
+        progress = self.__progress.find_one()
         print('Добавление начато на индексе: ' + progress[id_name])
         progress[id_name] = self.__run_processing(progress[id_name], parser_type, collection)
         print('Добавление завершено на индексе: ' + progress[id_name])
-        self.progress.update_one({}, progress)
+        self.__progress.update_one({}, progress)
 
     def __init_collections(self):
-        collection_names = self.db.list_collection_names()
+        collection_names = self.__db.list_collection_names()
 
         films_exists = 'films' in collection_names
-        self.films = self.db['films']
+        self.__films = self.__db['films']
         if not films_exists:
-            self.films.create_index('kinopoiskId', unique=True)
+            self.__films.create_index('kinopoiskId', unique=True)
 
         staff_exists = 'staff' in collection_names
-        self.staff = self.db['staff']
+        self.__staff = self.__db['staff']
         if not staff_exists:
-            self.staff.create_index('staffId', unique=True)
+            self.__staff.create_index('staffId', unique=True)
 
         progress_exists = 'progress' in collection_names
-        self.progress = self.db['progress']
+        self.__progress = self.__db['progress']
         if not progress_exists:
-            self.progress.insert_one({
+            self.__progress.insert_one({
                 'films_id': 298,
                 'staff_id': 298
             })
@@ -84,7 +84,7 @@ class Database:
         shared_num = multiprocessing.Value('i', initial_num)
         lock = multiprocessing.Lock()
 
-        parsers = [parser_type(key) for key in self.api_keys]
+        parsers = [parser_type(key) for key in self.__api_keys]
         Database.__run_parallel_processing(parsers, shared_num, lock, collection)
 
         return shared_num.value
