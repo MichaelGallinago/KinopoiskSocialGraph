@@ -25,38 +25,48 @@ class Database:
         self.__add_things('staff_id', StaffParser, self.__staff)
 
     @staticmethod
-    def _worker(database, parser, collection):
+    def _worker(parser, lock, shared_num):
+        files = []
         while True:
-            with database.lock:
-                film_id = database.shared_num.value
-                database.shared_num.value += 1
+            with lock:
+                film_id = shared_num.value
+                shared_num.value += 1
 
             status, data = parser.get_data(film_id)
             if status == Status.FINISH:
-                return
+                return files
 
             if data is not None:
-                try:
-                    if isinstance(data, list):
-                        collection.insert_many(data, ordered=False)
-                    else:
-                        collection.insert_one(data)
-                except Exception as e:
-                    print(f"Ошибка вставки документа для id={film_id}: {e}")
+                files.append(data)
 
-    def __run_parallel_processing(self, parsers, collection):
-        database = self
-        with multiprocessing.Pool(processes=len(parsers)) as pool:
-            tasks = [(database, parser, collection) for parser in parsers]
-            results = pool.starmap(self._worker, tasks)
-        return results
+    def _run_parallel_processing(self, initial_num, parser_type, collection):
+        parsers = [parser_type(key) for key in self.__api_keys]
+
+        manager = multiprocessing.Manager()
+        shared_num = manager.Value('i', initial_num)
+        lock = manager.Lock()
+
+        with multiprocessing.Pool() as pool:
+            tasks = [(parser, lock, shared_num) for parser in parsers]
+            files = pool.starmap(Database._worker, tasks)
+
+        for file in files:
+            try:
+                if isinstance(file, list):
+                    collection.insert_many(file, ordered=False)
+                else:
+                    collection.insert_one(file)
+            except Exception as e:
+                print(f"Ошибка вставки документа: {e}")
+
+        return shared_num.value
 
     def __add_things(self, id_name, parser_type, collection):
         progress = self.__progress.find_one()
         print('Добавление начато на индексе: ' + str(progress[id_name]))
-        progress[id_name] = self.__run_processing(progress[id_name], parser_type, collection)
+        progress[id_name] = self._run_parallel_processing(progress[id_name], parser_type, collection)
         print('Добавление завершено на индексе: ' + str(progress[id_name]))
-        self.__progress.update_one({}, progress)
+        self.__progress.update_one({}, {"$set": progress})
 
     def __init_collections(self):
         collection_names = self.__db.list_collection_names()
@@ -78,12 +88,3 @@ class Database:
                 'films_id': 298,
                 'staff_id': 298
             })
-
-    def __run_processing(self, initial_num, parser_type, collection):
-        self.shared_num = multiprocessing.Value('i', initial_num)
-        self.lock = multiprocessing.Lock()
-
-        parsers = [parser_type(key) for key in self.__api_keys]
-        self.__run_parallel_processing(parsers, collection)
-
-        return self.shared_num.value
