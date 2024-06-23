@@ -16,7 +16,7 @@ class Database:
         with open(keys_file_path, 'r') as file:
             self.__api_keys = file.readlines()
 
-    def __del__(self):
+    def close(self):
         self.__client.close()
 
     def add_films(self):
