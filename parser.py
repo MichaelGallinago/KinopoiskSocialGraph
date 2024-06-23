@@ -36,17 +36,20 @@ class Parser:
     API_URL = 'https://kinopoiskapiunofficial.tech/api/'
     headers = {}
 
-    def get_staff_data(self, film_id):
-        return self.__send_request('v1/staff?filmId=' + str(film_id))
+    def __init__(self, api_key):
+        self.headers = {
+            'X-API-KEY': api_key,
+            'Content-Type': 'application/json'
+        }
 
-    def get_film_data(self, film_id):
-        return self.__send_request('v2.2/films/' + str(film_id))
+    def get_data(self, film_id):
+        return Status.FINISH, None
 
-    def __send_request(self, endpoint):
+    def _send_request(self, endpoint):
         url = self.API_URL + endpoint
         while True:
             response = requests.get(url, headers=self.headers)
-            status = _get_status(response)
+            status = _get_status(response.status_code)
 
             match status:
                 case Status.NEXT:
@@ -56,8 +59,12 @@ class Parser:
                 case Status.FINISH:
                     return status, None
 
-    def __init__(self, api_key):
-        self.headers = {
-            'X-API-KEY': api_key,
-            'Content-Type': 'application/json'
-        }
+
+class FilmParser(Parser):
+    def get_data(self, film_id):
+        return self._send_request('v2.2/films/' + str(film_id))
+
+
+class StaffParser(Parser):
+    def get_data(self, film_id):
+        return self._send_request('v1/staff?filmId=' + str(film_id))

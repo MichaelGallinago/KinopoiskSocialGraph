@@ -1,5 +1,6 @@
-﻿from parser import Parser
+﻿from database import Database
 
 if __name__ == '__main__':
-    Parser.get_films('5')
-    # Parser.parse('952236')
+    database = Database('X-API-KEY.txt')
+
+    database.add_films()
