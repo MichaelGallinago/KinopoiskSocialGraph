@@ -6,6 +6,8 @@ from parser import FilmParser
 from parser import Status
 import multiprocessing
 
+num_cpus = multiprocessing.cpu_count()
+
 
 class Database:
     def __init__(self, keys_file_path):
@@ -42,7 +44,7 @@ class Database:
             if data is not None:
                 files.append(data)
 
-            time.sleep(max(0.0, 0.05 - time.time() + start_time))
+            time.sleep(max(0.0, 0.05 * num_cpus - time.time() + start_time))
 
         return files
 
@@ -53,7 +55,7 @@ class Database:
         shared_num = manager.Value('i', initial_num)
         lock = manager.Lock()
 
-        with multiprocessing.Pool() as pool:
+        with multiprocessing.Pool(processes=num_cpus) as pool:
             tasks = [(parser, lock, shared_num) for parser in parsers]
             files_list = pool.starmap(Database._worker, tasks)
 
