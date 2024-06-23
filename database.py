@@ -1,9 +1,10 @@
-﻿from pymongo import MongoClient
+﻿import time
+
+from pymongo import MongoClient
 from parser import StaffParser
 from parser import FilmParser
 from parser import Status
 import multiprocessing
-import requests
 
 
 class Database:
@@ -14,7 +15,7 @@ class Database:
         self.__init_collections()
 
         with open(keys_file_path, 'r') as file:
-            self.__api_keys = file.readlines()
+            self.__api_keys = [line.strip() for line in file.readlines()]
 
     def close(self):
         self.__client.close()
@@ -29,6 +30,7 @@ class Database:
     def _worker(parser, lock, shared_num):
         files = []
         for i in range(parser.get_quota()):
+            start_time = time.time()
             with lock:
                 film_id = shared_num.value
                 shared_num.value += 1
@@ -39,6 +41,8 @@ class Database:
 
             if data is not None:
                 files.append(data)
+
+            time.sleep(max(0.0, 0.05 - time.time() + start_time))
 
         return files
 

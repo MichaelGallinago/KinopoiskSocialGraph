@@ -62,7 +62,7 @@ class Parser:
                     return status, None
 
     def get_quota(self):
-        response = requests.get(f'{self.API_URL}v1/api_keys/{self.headers['X-API-KEY']}', headers=self.headers)
+        response = requests.get(self.API_URL + 'v1/api_keys/' + self.headers['X-API-KEY'], headers=self.headers)
 
         if response.status_code == 200:
             data = response.json()
