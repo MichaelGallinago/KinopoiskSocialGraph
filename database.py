@@ -37,10 +37,13 @@ class Database:
                 return
 
             if data is not None:
-                if isinstance(data, list):
-                    collection.insert_many(data)
-                else:
-                    collection.insert_one(data)
+                try:
+                    if isinstance(data, list):
+                        collection.insert_many(data, ordered=False)
+                    else:
+                        collection.insert_one(data)
+                except Exception as e:
+                    print(f"Ошибка вставки документа для id={film_id}: {e}")
 
     @staticmethod
     def __run_parallel_processing(parsers, shared_num, lock, collection):
@@ -51,7 +54,9 @@ class Database:
 
     def __add_things(self, id_name, parser_type, collection):
         progress = self.progress.find_one()
+        print('Добавление начато на индексе: ' + progress[id_name])
         progress[id_name] = self.__run_processing(progress[id_name], parser_type, collection)
+        print('Добавление завершено на индексе: ' + progress[id_name])
         self.progress.update_one({}, progress)
 
     def __init_collections(self):
@@ -80,6 +85,6 @@ class Database:
         lock = multiprocessing.Lock()
 
         parsers = [parser_type(key) for key in self.api_keys]
-        results = Database.__run_parallel_processing(parsers, shared_num, lock, collection)
+        Database.__run_parallel_processing(parsers, shared_num, lock, collection)
 
         return shared_num.value

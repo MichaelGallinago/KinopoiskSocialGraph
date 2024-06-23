@@ -1,4 +1,5 @@
 ﻿import requests
+import time
 from enum import Enum
 
 
@@ -26,6 +27,7 @@ def _get_status(status_code):
             return Status.SKIP
         case 429:
             print(error_code + 'Слишком много запросов. Общий лимит - 20 запросов в секунду')
+            time.sleep(1)
             return Status.REPEAT
         case _:
             print(error_code + 'Неизвестная ошибка')
