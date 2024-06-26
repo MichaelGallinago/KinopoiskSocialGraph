@@ -1,32 +1,22 @@
 ﻿import time
 
 from pymongo import MongoClient
-from parser import StaffParser
-from parser import FilmParser
-from parser import Status
+from parser_pool import ParserPool
 import multiprocessing
 
 num_cpus = multiprocessing.cpu_count()
 
 
 class Database:
-    def __init__(self, keys_file_path):
+    def __init__(self):
         self.__client = MongoClient('mongodb://localhost:27017/')
         self.__db = self.__client['ksg']
+        self.__pool = ParserPool()
 
         self.__init_collections()
 
-        with open(keys_file_path, 'r') as file:
-            self.__api_keys = [line.strip() for line in file.readlines()]
-
     def close(self):
         self.__client.close()
-
-    def add_films(self):
-        self.__add_things('films_id', FilmParser, self.__films)
-
-    def add_staff(self):
-        self.__add_things('staff_id', StaffParser, self.__staff)
 
     @staticmethod
     def _worker(parser, lock, shared_num):
@@ -38,44 +28,27 @@ class Database:
                 shared_num.value += 1
 
             status, data = parser.get_data(film_id)
-            if status == Status.FINISH:
-                return files
 
             if data is not None:
                 files.append(data)
+
+            if status == 402:
+                return files
 
             time.sleep(max(0.0, 0.05 * num_cpus - time.time() + start_time))
 
         return files
 
-    def _run_parallel_processing(self, initial_num, parser_type):
-        parsers = [parser_type(key) for key in self.__api_keys]
+    def get_person(self, person_id):
+        document = self.__persons.find_one({"personId": person_id})
 
-        manager = multiprocessing.Manager()
-        shared_num = manager.Value('i', initial_num)
-        lock = manager.Lock()
+        if document is None:
+            print('wait')
+            status, document = self.__pool.get_person(person_id)
+            if status == 200 and document is not None:
+                self.__persons.insert_one(document)
 
-        with multiprocessing.Pool(processes=num_cpus) as pool:
-            tasks = [(parser, lock, shared_num) for parser in parsers]
-            files_list = pool.starmap(Database._worker, tasks)
-
-        return shared_num.value, files_list
-
-    def __add_things(self, id_name, parser_type, collection):
-        progress = self.__progress.find_one()
-        print('Добавление начато на индексе: ' + str(progress[id_name]))
-
-        progress[id_name], files_list = self._run_parallel_processing(progress[id_name], parser_type)
-
-        if len(files_list) > 0:
-            if isinstance(files_list[0], list):
-                for files in files_list:
-                    self.__insert_files(files, collection)
-            else:
-                self.__insert_files(files_list, collection)
-
-        print('Добавление завершено на индексе: ' + str(progress[id_name]))
-        self.__progress.update_one({}, {"$set": progress})
+        print(document)
 
     @staticmethod
     def __insert_files(files, collection):
@@ -101,7 +74,27 @@ class Database:
         if not staff_exists:
             self.__staff.create_index('staffId', unique=True)
 
+        persons_exists = 'persons' in collection_names
+        self.__persons = self.__db['persons']
+        if not persons_exists:
+            self.__persons.create_index('personId', unique=True)
+
         progress_exists = 'progress' in collection_names
         self.__progress = self.__db['progress']
         if not progress_exists:
             self.__progress.insert_many([{'films_id': 298}, {'staff_id': 298}])
+
+    def _check_status(status_code):
+        error_code = f'Error {status_code}: '
+
+        match status_code:
+            case 200:
+                print('')
+            case 401:
+                print(error_code + 'Пустой или неправильный токен')
+            case 402:
+                print(error_code + 'Превышен лимит запросов(или дневной, или общий)')
+            case 404:
+                print(error_code + 'Фильм не найден')
+            case _:
+                print(error_code + 'Неизвестная ошибка')
