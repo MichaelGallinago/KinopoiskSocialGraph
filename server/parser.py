@@ -24,18 +24,24 @@ class Parser:
     def _send_request(self, endpoint):
         url = self.API_URL + endpoint
         while True:
-            response = requests.get(url, headers=self.headers)
-            status = response.status_code
+            try:
+                response = requests.get(url, headers=self.headers)
+                status = response.status_code
 
-            if status == 200:
-                return status, response.json()
+                if status == 200:
+                    return status, response.json()
 
-            if status == 429:
-                print('Слишком много запросов. Общий лимит - 20 запросов в секунду')
-                time.sleep(1)
-                continue
+                if status == 429:
+                    print('Слишком много запросов. Общий лимит - 20 запросов в секунду')
+                    time.sleep(1)
+                    continue
 
-            return status, None
+                if status == 402:
+                    print(url + ' : Превышен лимит запросов(или дневной, или общий)')
+
+                return status, None
+            except requests.exceptions.Timeout:
+                print("Превышено время ожидания: " + url)
 
     def get_quota(self):
         response = requests.get(self.API_URL + 'v1/api_keys/' + self.headers['X-API-KEY'], headers=self.headers)

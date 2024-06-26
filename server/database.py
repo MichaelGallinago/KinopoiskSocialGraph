@@ -48,12 +48,10 @@ class Database:
             new_person_ids = set()
 
             for person_id in search_person_ids:
-                films = self.get_films(person_id)
-                film_ids = [film['filmId'] for film in films]
+                film_ids = self.get_film_ids(person_id)
                 staff_groups = Database.__find_files(
                     'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
-                persons = self.get_persons_from_staff(staff_groups)
-                new_person_ids.update([person['personId'] for person in persons])
+                self.add_persons_ids_from_staff(staff_groups, new_person_ids)
 
             new_person_ids.difference_update(person_ids)
             person_ids.update(new_person_ids)
@@ -84,39 +82,53 @@ class Database:
             return document
         # TODO: exception
 
-    def get_persons_from_staff(self, staff_groups):
+    def add_persons_ids_from_staff(self, staff_groups, person_ids):
         if staff_groups is None:
             # TODO: exception
             return
 
-        person_ids = [person['personId'] for person in (group for group in staff_groups['staff'])]
-        return Database.__find_files(
-            'personId', person_ids, self.__persons, self.__pool.get_person, Database.__append_document)
+        groups = [group['staff'] for group in staff_groups]
+        for group in groups:
+            staff_ids = [person["staffId"] for person in group]
+            persons = Database.__find_files(
+                'personId', staff_ids, self.__persons, self.__pool.get_person, Database.__append_document)
+            person_ids.update([person['personId'] for person in persons])
 
-    def get_films(self, person_id):
-        person_document = self.get_person(person_id)
-
-        if person_document is None:
-            # TODO: exception
-            return
-
-        film_ids = [film['filmId'] for film in person_document['films']]
+    def get_films(self, film_ids):
         return Database.__find_files(
             'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
+
+    def get_film_ids(self, person_id):
+        person_document = self.get_person(person_id)
+        if person_document is None:
+            # TODO: exception
+            return None
+
+        return list(set([film['filmId'] for film in person_document['films']]))
 
     @staticmethod
     def __find_files(key, ids, collection, get_method, append_method):
         found_files = collection.find({key: {'$in': ids}})
         found_files_ids = [file[key] for file in found_files]
-        missing_ids = [index for index in found_files_ids if index not in ids]
+        missing_ids = [index for index in ids if index not in found_files_ids]
 
         if len(missing_ids) <= 0:
-            return found_files
+            return collection.find({key: {'$in': ids}})
 
         new_staff = Database.__get_files_multithread(get_method, missing_ids, append_method)
-        collection.insert_many(new_staff, ordered=False)
+        Database.__insert_files(new_staff, collection)
         found_files = collection.find({key: {'$in': ids}})
         return found_files
+
+    @staticmethod
+    def __insert_files(file, collection):
+        try:
+            if isinstance(file, list):
+                collection.insert_many(file, ordered=False)
+            else:
+                collection.insert_one(file)
+        except Exception as e:
+            print(f"Ошибка вставки документа: {e}")
 
     @staticmethod
     def __get_files_multithread(get_method, search_ids, append_method):

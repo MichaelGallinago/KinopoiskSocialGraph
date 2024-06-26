@@ -5,7 +5,7 @@ class ParserPool:
     __parsers = None
 
     def __init__(self):
-        with open('X-API-KEY.txt', 'r') as file:
+        with open('server/X-API-KEY.txt', 'r') as file:
             api_keys = [line.strip() for line in file.readlines()]
 
         if len(api_keys) <= 0:
