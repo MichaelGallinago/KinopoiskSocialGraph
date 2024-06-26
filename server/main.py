@@ -2,5 +2,5 @@
 
 if __name__ == '__main__':
     database = Database()
-    database.get_person(6141)
+    print(database.get_person_graph(513))
     database.close()
