@@ -87,9 +87,10 @@ class Database:
 
     @staticmethod
     def __find_files(key, ids, collection, get_method, append_method):
+        ids = list(set(ids))
         found_files = collection.find({key: {'$in': ids}})
         found_files_ids = [file[key] for file in found_files]
-        missing_ids = list(set([index for index in ids if index not in found_files_ids]))
+        missing_ids = [index for index in ids if index not in found_files_ids]
 
         if len(missing_ids) <= 0 or is_limit_reached:
             return collection.find({key: {'$in': ids}})
