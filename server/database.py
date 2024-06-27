@@ -1,92 +1,155 @@
-﻿import time
+﻿import threading
+import time
 
 from pymongo import MongoClient
-from parser import StaffParser
-from parser import FilmParser
-from parser import Status
-import multiprocessing
+from parser_pool import ParserPool
 
-num_cpus = multiprocessing.cpu_count()
+is_limit_reached = False
 
 
 class Database:
-    def __init__(self, keys_file_path):
+
+    def __init__(self):
         self.__client = MongoClient('mongodb://localhost:27017/')
         self.__db = self.__client['ksg']
-
+        self.__pool = ParserPool()
         self.__init_collections()
-
-        with open(keys_file_path, 'r') as file:
-            self.__api_keys = [line.strip() for line in file.readlines()]
 
     def close(self):
         self.__client.close()
 
-    def add_films(self):
-        self.__add_things('films_id', FilmParser, self.__films)
+    def get_person_graph(self, root_person_id, steps=1):
+        person_ids = set()
+        new_person_ids = {root_person_id}
 
-    def add_staff(self):
-        self.__add_things('staff_id', StaffParser, self.__staff)
+        for i in range(steps):
+            search_person_ids = new_person_ids.copy()
+            new_person_ids = set()
+
+            for person_id in search_person_ids:
+                film_ids = self.get_film_ids(person_id)
+                staff_groups = Database.__find_files(
+                    'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
+                self.add_persons_ids_from_staff(staff_groups, new_person_ids)
+
+            new_person_ids.difference_update(person_ids)
+            person_ids.update(new_person_ids)
+
+        return person_ids
+
+    def get_person(self, person_id):
+        document = self.__persons.find_one({"personId": person_id})
+
+        if document is not None:
+            return document
+
+        status, document = self.__pool.get_person(person_id)
+        if status == 200 and document is not None:
+            self.__persons.insert_one(document)
+        # TODO: exception
+
+    def get_staff(self, film_id):
+        document = self.__staff.find_one({"filmId": film_id})
+
+        if document is not None:
+            return document
+
+        status, staff = self.__pool.get_staff(film_id)
+        if status == 200 and staff is not None:
+            document = {"filmId": film_id, "staff": staff}
+            self.__staff.insert_one(document)
+            return document
+        # TODO: exception
+
+    def add_persons_ids_from_staff(self, staff_groups, person_ids):
+        if staff_groups is None:
+            # TODO: exception
+            return
+
+        groups = [group['staff'] for group in staff_groups]
+        for group in groups:
+            staff_ids = [person["staffId"] for person in group]
+            persons = Database.__find_files(
+                'personId', staff_ids, self.__persons, self.__pool.get_person, Database.__append_document)
+            person_ids.update([person['personId'] for person in persons])
+
+    def get_films(self, film_ids):
+        return Database.__find_files(
+            'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
+
+    def get_film_ids(self, person_id):
+        person_document = self.get_person(person_id)
+        if person_document is None:
+            # TODO: exception
+            return None
+
+        return list(set([film['filmId'] for film in person_document['films']]))
 
     @staticmethod
-    def _worker(parser, lock, shared_num):
+    def __find_files(key, ids, collection, get_method, append_method):
+        ids_set = list(set(ids))
+        found_files = collection.find({key: {'$in': ids_set}})
+        found_files_ids = [file[key] for file in found_files]
+        missing_ids = list(set([index for index in ids_set if index not in found_files_ids]))
+
+        if len(missing_ids) <= 0 or is_limit_reached:
+            return collection.find({key: {'$in': ids_set}})
+
+        new_files = Database.__get_files_multithread(get_method, missing_ids, append_method)
+        Database.__insert_files(new_files, collection)
+        return collection.find({key: {'$in': ids_set}})
+
+    @staticmethod
+    def __insert_files(file, collection):
+        try:
+            if isinstance(file, list):
+                collection.insert_many(file, ordered=False)
+            else:
+                collection.insert_one(file)
+        except Exception as e:
+            print(f"Ошибка вставки документа: {file}, {collection}, {e}")
+
+    @staticmethod
+    def __get_files_multithread(get_method, search_ids, append_method):
+        global is_limit_reached
+
+        threads = []
         files = []
-        for i in range(parser.get_quota()):
-            start_time = time.time()
-            with lock:
-                film_id = shared_num.value
-                shared_num.value += 1
 
-            status, data = parser.get_data(film_id)
-            if status == Status.FINISH:
-                return files
+        if is_limit_reached:
+            return files
 
-            if data is not None:
-                files.append(data)
+        def thread_worker(index):
+            if is_limit_reached:
+                return
 
-            time.sleep(max(0.0, 0.05 * num_cpus - time.time() + start_time))
+            status, document = get_method(index)
+            if status == 200:
+                append_method(files, document, index)
+            else:
+                Database._check_status(status, index)
+            # TODO: exceptions
+
+        for search_id in search_ids:
+            if is_limit_reached:
+                break
+            thread = threading.Thread(target=thread_worker, args=(search_id,))
+            threads.append(thread)
+            thread.start()
+            time.sleep(0.055)
+
+        for thread in threads:
+            thread.join()
 
         return files
 
-    def _run_parallel_processing(self, initial_num, parser_type):
-        parsers = [parser_type(key) for key in self.__api_keys]
-
-        manager = multiprocessing.Manager()
-        shared_num = manager.Value('i', initial_num)
-        lock = manager.Lock()
-
-        with multiprocessing.Pool(processes=num_cpus) as pool:
-            tasks = [(parser, lock, shared_num) for parser in parsers]
-            files_list = pool.starmap(Database._worker, tasks)
-
-        return shared_num.value, files_list
-
-    def __add_things(self, id_name, parser_type, collection):
-        progress = self.__progress.find_one()
-        print('Добавление начато на индексе: ' + str(progress[id_name]))
-
-        progress[id_name], files_list = self._run_parallel_processing(progress[id_name], parser_type)
-
-        if len(files_list) > 0:
-            if isinstance(files_list[0], list):
-                for files in files_list:
-                    self.__insert_files(files, collection)
-            else:
-                self.__insert_files(files_list, collection)
-
-        print('Добавление завершено на индексе: ' + str(progress[id_name]))
-        self.__progress.update_one({}, {"$set": progress})
+    @staticmethod
+    def __append_document(files, document, index):
+        files.append(document)
 
     @staticmethod
-    def __insert_files(files, collection):
-        for file in files:
-            try:
-                if isinstance(file, list):
-                    collection.insert_many(file, ordered=False)
-                else:
-                    collection.insert_one(file)
-            except Exception as e:
-                print(f"Ошибка вставки документа: {e}")
+    def __append_staff(files, document, index):
+        files.append({"kinopoiskId": index, "staff": document})
 
     def __init_collections(self):
         collection_names = self.__db.list_collection_names()
@@ -99,9 +162,32 @@ class Database:
         staff_exists = 'staff' in collection_names
         self.__staff = self.__db['staff']
         if not staff_exists:
-            self.__staff.create_index('staffId', unique=True)
+            self.__staff.create_index('kinopoiskId', unique=True)
+
+        persons_exists = 'persons' in collection_names
+        self.__persons = self.__db['persons']
+        if not persons_exists:
+            self.__persons.create_index('personId', unique=True)
 
         progress_exists = 'progress' in collection_names
         self.__progress = self.__db['progress']
         if not progress_exists:
             self.__progress.insert_many([{'films_id': 298}, {'staff_id': 298}])
+
+    @staticmethod
+    def _check_status(status_code, index):
+        error_code = f'Error on id={index}: {status_code}: '
+
+        match status_code:
+            case 200:
+                pass
+            case 401:
+                print(error_code + 'Пустой или неправильный токен')
+            case 402:
+                print(error_code + 'Превышен лимит запросов(или дневной, или общий)')
+                global is_limit_reached
+                is_limit_reached = True
+            case 404:
+                print(error_code + 'Фильм не найден')
+            case _:
+                print(error_code + 'Неизвестная ошибка')
