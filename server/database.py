@@ -3,12 +3,12 @@ import time
 
 from pymongo import MongoClient
 from parser_pool import ParserPool
-import multiprocessing
 
-num_cpus = multiprocessing.cpu_count()
+is_limit_reached = False
 
 
 class Database:
+
     def __init__(self):
         self.__client = MongoClient('mongodb://localhost:27017/')
         self.__db = self.__client['ksg']
@@ -17,27 +17,6 @@ class Database:
 
     def close(self):
         self.__client.close()
-
-    @staticmethod
-    def _worker(parser, lock, shared_num):
-        files = []
-        for i in range(parser.get_quota()):
-            start_time = time.time()
-            with lock:
-                film_id = shared_num.value
-                shared_num.value += 1
-
-            status, data = parser.get_data(film_id)
-
-            if data is not None:
-                files.append(data)
-
-            if status == 402:
-                return files
-
-            time.sleep(max(0.0, 0.05 * num_cpus - time.time() + start_time))
-
-        return files
 
     def get_person_graph(self, root_person_id, steps=1):
         person_ids = set()
@@ -112,13 +91,12 @@ class Database:
         found_files_ids = [file[key] for file in found_files]
         missing_ids = [index for index in ids if index not in found_files_ids]
 
-        if len(missing_ids) <= 0:
+        if len(missing_ids) <= 0 or is_limit_reached:
             return collection.find({key: {'$in': ids}})
 
-        new_staff = Database.__get_files_multithread(get_method, missing_ids, append_method)
-        Database.__insert_files(new_staff, collection)
-        found_files = collection.find({key: {'$in': ids}})
-        return found_files
+        new_files = Database.__get_files_multithread(get_method, missing_ids, append_method)
+        Database.__insert_files(new_files, collection)
+        return collection.find({key: {'$in': ids}})
 
     @staticmethod
     def __insert_files(file, collection):
@@ -128,20 +106,32 @@ class Database:
             else:
                 collection.insert_one(file)
         except Exception as e:
-            print(f"Ошибка вставки документа: {e}")
+            print(f"Ошибка вставки документа: {file}, {collection}, {e}")
 
     @staticmethod
     def __get_files_multithread(get_method, search_ids, append_method):
+        global is_limit_reached
+
         threads = []
         files = []
 
+        if is_limit_reached:
+            return files
+
         def thread_worker(index):
+            if is_limit_reached:
+                return
+
             status, document = get_method(index)
             if status == 200:
                 append_method(files, document, index)
+            else:
+                Database._check_status(status, index)
             # TODO: exceptions
 
         for search_id in search_ids:
+            if is_limit_reached:
+                break
             thread = threading.Thread(target=thread_worker, args=(search_id,))
             threads.append(thread)
             thread.start()
@@ -183,16 +173,19 @@ class Database:
         if not progress_exists:
             self.__progress.insert_many([{'films_id': 298}, {'staff_id': 298}])
 
-    def _check_status(status_code):
-        error_code = f'Error {status_code}: '
+    @staticmethod
+    def _check_status(status_code, index):
+        error_code = f'Error on id={index}: {status_code}: '
 
         match status_code:
             case 200:
-                print('')
+                pass
             case 401:
                 print(error_code + 'Пустой или неправильный токен')
             case 402:
                 print(error_code + 'Превышен лимит запросов(или дневной, или общий)')
+                global is_limit_reached
+                is_limit_reached = True
             case 404:
                 print(error_code + 'Фильм не найден')
             case _:

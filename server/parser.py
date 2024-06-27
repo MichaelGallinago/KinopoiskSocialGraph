@@ -36,8 +36,8 @@ class Parser:
                     time.sleep(1)
                     continue
 
-                if status == 402:
-                    print(url + ' : Превышен лимит запросов(или дневной, или общий)')
+                if status == 403:
+                    print('403: ' + self.headers['X-API-KEY'])
 
                 return status, None
             except requests.exceptions.Timeout:
