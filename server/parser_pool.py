@@ -1,4 +1,6 @@
-﻿from parser import Parser
+﻿import time
+
+from parser import Parser
 
 
 class ParserPool:
@@ -8,11 +10,8 @@ class ParserPool:
         with open('server/X-API-KEY.txt', 'r') as file:
             api_keys = [line.strip() for line in file.readlines()]
 
-        if len(api_keys) <= 0:
-            return
-
-        self.__parsers = [Parser(key) for key in api_keys]
         self.__index = 0
+        self.__parsers = [Parser(key) for key in api_keys]
 
     def get_film(self, film_id):
         return self.__get_response(film_id, Parser.get_film)
@@ -28,11 +27,22 @@ class ParserPool:
             return 402, None
 
         while True:
-            status, file = method(self.__parsers[self.__index], index)
+            parser_index = self.__index
+            status, file = method(self.__parsers[parser_index], index)
 
             if status == 402:
-                self.__index += 1
+                if parser_index == self.__index:
+                    self.__index += 1
+
                 if self.__index < len(self.__parsers):
                     continue
 
             return status, file
+
+    def get_quota(self):
+        quota = []
+        for parser in self.__parsers:
+            quota.append(parser.get_quota())
+            time.sleep(0.5)
+        return quota
+
