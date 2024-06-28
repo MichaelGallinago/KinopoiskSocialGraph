@@ -5,5 +5,6 @@ if __name__ == '__main__':
     # pool = parser_pool.ParserPool()
     # print(pool.get_quota())
     database = Database()
-    print(database.get_person_graph(513, 3, 5, 5))
+    graph = database.get_person_graph(513, 3, 5, 10)
+    print(len(graph))
     database.close()
