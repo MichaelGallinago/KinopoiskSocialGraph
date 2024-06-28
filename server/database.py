@@ -18,7 +18,7 @@ class Database:
     def close(self):
         self.__client.close()
 
-    def get_person_graph(self, root_person_id, steps=1):
+    def get_person_graph(self, root_person_id, steps=1, staff_limit=20):
         person_ids = set()
         new_person_ids = {root_person_id}
 
@@ -30,7 +30,7 @@ class Database:
                 film_ids = self.get_film_ids(person_id)
                 staff_groups = Database.__find_files(
                     'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
-                self.add_persons_ids_from_staff(staff_groups, new_person_ids)
+                self.add_persons_ids_from_staff(staff_groups, new_person_ids, staff_limit)
 
             new_person_ids.difference_update(person_ids)
             person_ids.update(new_person_ids)
@@ -61,14 +61,14 @@ class Database:
             return document
         # TODO: exception
 
-    def add_persons_ids_from_staff(self, staff_groups, person_ids):
+    def add_persons_ids_from_staff(self, staff_groups, person_ids, staff_limit):
         if staff_groups is None:
             # TODO: exception
             return
 
         groups = [group['staff'] for group in staff_groups]
         for group in groups:
-            staff_ids = [person["staffId"] for person in group]
+            staff_ids = [person["staffId"] for person in group][:staff_limit]
             persons = Database.__find_files(
                 'personId', staff_ids, self.__persons, self.__pool.get_person, Database.__append_document)
             person_ids.update([person['personId'] for person in persons])
