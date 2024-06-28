@@ -4,7 +4,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Социальный граф кинопоиска</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" type="text/css" href="css/login-modal.css">
 </head>
 <body>
 	<div class="main-container">
@@ -43,5 +44,29 @@
 			</form>
 		</div>
 	</div>
+
+	<div class="login-modal">
+		<div class="login-modal-overlay">
+			<div class="login-modal-window">
+				<img src="img/close-icon.png" alt="close-icon" class="close-icon">
+				<h2 class="login-title">Вход</h2>
+				<form action="" method="post" class="login-form">
+					<div class="input-fields">
+						<div class="field">
+							<img src="img/login-icon.png" alt="login-icon" class="login-icon">
+							<input type="text" name="login" class="input-field" required placeholder="Логин" />
+						</div>
+						<div class="field">
+							<img src="img/password-icon.png" alt="password-icon" class="password-icon">
+							<input type="password" name="password" class="input-field" required placeholder="Пароль" />
+						</div>
+					</div>
+					<button type="submit" class="login-button">Войти</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+<script src="js/main.js"></script>
 </body>
 </html>

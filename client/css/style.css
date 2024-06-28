@@ -1,3 +1,8 @@
+::selection {
+	background: #726253;
+	color: #F4F4F4;
+}
+
 body {
 	margin: 0;
 	padding: 0;
@@ -121,7 +126,7 @@ h1, h2, p {
 	border: 2px solid transparent;
 	padding: 20px 30px;
 	font-size: 28px;
-	color: #222;
+	color: #E48E3F;
 	background-color: rgba(228, 192, 63, 0.2);
 	border-radius: 8px;
 	transition: all 0.1s ease;
