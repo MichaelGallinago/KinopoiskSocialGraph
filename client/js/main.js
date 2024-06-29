@@ -6,7 +6,7 @@ openLoginWindow.addEventListener('click', event => {
 })
 
 // Регистрация
-const BASE_URL = "" // TODO: Установить URL
+const BASE_URL = "http://127.0.0.1:5000" // TODO: Установить URL
 const registerForm = document.getElementById('register-form')
 
 registerForm.addEventListener('submit', function (event) {
@@ -18,7 +18,7 @@ registerForm.addEventListener('submit', function (event) {
         password: document.getElementById('register-password-input').value
     }
 
-    fetch(BASE_URL, {
+    fetch(BASE_URL + '/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -30,11 +30,11 @@ registerForm.addEventListener('submit', function (event) {
                 if (response.ok) {
                     alert('Регистрация прошла успешно!')
                 } else {
-                    alert('Ошибка регистрации!')
+                    alert('Ошибка регистрации: ' + response.status)
                 }
             }
         )
         .catch(function (error) {
-            alert('Произошла ошибка!')
+            alert('Произошла ошибка: ' + error)
         })
 })
