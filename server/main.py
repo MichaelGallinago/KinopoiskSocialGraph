@@ -1,4 +1,6 @@
-﻿from database import Database
+﻿import socket
+
+from database import Database
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -57,6 +59,17 @@ def login():
         return jsonify({"error": "Invalid username or password"}), 400
 
     return jsonify({"message": "Login successful"}), 200
+
+
+@app.route('/make_graph', methods=['POST'])
+def make_graph():
+    data = request.json
+    required_keys = ['person_id', 'steps', 'staff_limit', 'film_limit']
+
+    if not data or not all(key in data and isinstance(data[key], int) for key in required_keys):
+        return jsonify({"error": "Invalid input"}), 400
+
+    return jsonify({"message": "hello"})
 
 
 if __name__ == '__main__':
