@@ -1,0 +1,67 @@
+.login-modal {}
+
+.login-modal.open .auth-overlay,
+.login-modal.open .auth-modal-window {
+    opacity: 1;
+    z-index: 1000;
+}
+
+.auth-overlay, .auth-modal-window {
+    opacity: 0;
+    z-index: -1;
+}
+
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.auth-modal-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    max-width: 470px;
+    background-color: #F4F4F4;
+    border-radius: 8px;
+    padding: 0 56px 40px 56px;
+    text-align: center;
+}
+
+.close-icon {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+}
+
+.login-title {
+    color: #E48E3F;
+    font-size: 48px;
+    font-weight: bold;
+    padding-top: 40px;
+}
+
+.login-form {
+    margin-top: 52px;
+}
+
+.login-button {
+    margin-top: 22px;
+    display: block;
+    background-color: #E48E3F;
+}
+.login-button:hover {
+    background-color: transparent;
+    border-color: #E48E3F;
+    box-shadow: none;
+    color: #E48E3F;
+}
