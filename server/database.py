@@ -18,7 +18,7 @@ class Database:
     def close(self):
         self.__client.close()
 
-    def get_person_graph(self, root_person_id, steps=1, staff_limit=20, film_limit=20):
+    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=10):
         person_ids = set()
         new_person_ids = {root_person_id}
 
@@ -67,11 +67,13 @@ class Database:
             return
 
         groups = [group['staff'] for group in staff_groups][:film_limit]
+        staff_ids = set()
         for group in groups:
-            staff_ids = [person["staffId"] for person in group][:staff_limit]
-            persons = Database.__find_files(
-                'personId', staff_ids, self.__persons, self.__pool.get_person, Database.__append_document)
-            person_ids.update([person['personId'] for person in persons])
+            staff_ids.update([person["staffId"] for person in group][:staff_limit])
+
+        persons = Database.__find_files(
+            'personId', list(staff_ids), self.__persons, self.__pool.get_person, Database.__append_document)
+        person_ids.update([person['personId'] for person in persons])
 
     def get_films(self, film_ids):
         return Database.__find_files(
