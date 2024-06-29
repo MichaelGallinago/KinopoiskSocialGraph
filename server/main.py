@@ -2,6 +2,7 @@
 
 from database import Database
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from email_validator import validate_email, EmailNotValidError
@@ -9,19 +10,20 @@ from email_validator import validate_email, EmailNotValidError
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
 mongo = PyMongo(app)
+CORS(app)
 
 
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    if not data or not all(k in data for k in ("username", "email", "password")):
+    if not data or not all(k in data for k in ("login", "email", "password")):
         return jsonify({"error": "Invalid input"}), 400
 
-    username = data['username']
+    login = data['login']
     email = data['email']
     password = data['password']
 
-    if not username or not email or not password:
+    if not login or not email or not password:
         return jsonify({"error": "Fields cannot be empty"}), 400
 
     try:
@@ -29,12 +31,12 @@ def register():
     except EmailNotValidError:
         return jsonify({"error": "Invalid email"}), 400
 
-    if mongo.db.users.find_one({"username": username}) or mongo.db.users.find_one({"email": email}):
+    if mongo.db.users.find_one({"username": login}) or mongo.db.users.find_one({"email": email}):
         return jsonify({"error": "Username or email already exists"}), 400
 
     hashed_password = generate_password_hash(password)
     mongo.db.users.insert_one({
-        "username": username,
+        "login": login,
         "email": email,
         "password": hashed_password
     })
