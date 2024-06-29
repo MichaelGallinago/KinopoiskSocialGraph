@@ -32,7 +32,7 @@ class Parser:
                     return status, response.json()
 
                 if status == 429:
-                    print('Слишком много запросов. Общий лимит - 20 запросов в секунду')
+                    print('Слишком много запросов. Общий лимит - 20 запросов в секунду: \n' + url)
                     time.sleep(1)
                     continue
 

@@ -1,4 +1,5 @@
-﻿import time
+﻿import threading
+import time
 
 from parser import Parser
 
@@ -11,7 +12,7 @@ class ParserPool:
             api_keys = [line.strip() for line in file.readlines()]
 
         self.__index = 0
-        self.__parsers = [Parser(key) for key in api_keys]
+        self.__parsers = self.__get_ready_parsers(api_keys)
 
     def get_film(self, film_id):
         return self.__get_response(film_id, Parser.get_film)
@@ -46,3 +47,23 @@ class ParserPool:
             time.sleep(0.5)
         return quota
 
+    @staticmethod
+    def __get_ready_parsers(api_keys):
+        parsers = [Parser(key) for key in api_keys]
+        threads = []
+
+        def thread_worker():
+            quota = parser.get_quota()
+            if quota > 0:
+                parsers.append(parser)
+
+        for parser in parsers:
+            thread = threading.Thread(target=thread_worker)
+            threads.append(thread)
+            thread.start()
+            time.sleep(0.5)
+
+        for thread in threads:
+            thread.join()
+
+        return parsers

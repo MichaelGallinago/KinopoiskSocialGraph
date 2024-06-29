@@ -26,11 +26,19 @@ class Database:
             search_person_ids = new_person_ids.copy()
             new_person_ids = set()
 
+            film_ids = set()
             for person_id in search_person_ids:
-                film_ids = self.get_film_ids(person_id)
-                staff_groups = Database.__find_files(
-                    'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
-                self.add_persons_ids_from_staff(staff_groups, new_person_ids, staff_limit, film_limit)
+                film_ids.update(self.get_film_ids(person_id))
+
+            staff_groups = Database.__find_files(
+                'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
+            new_person_ids.update(self.get_persons_ids_from_staff(staff_groups, staff_limit, film_limit))
+
+            #for person_id in search_person_ids:
+            #    film_ids = self.get_film_ids(person_id)
+            #    staff_groups = Database.__find_files(
+            #        'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
+            #    new_person_ids.update(self.get_persons_ids_from_staff(staff_groups, staff_limit, film_limit))
 
             new_person_ids.difference_update(person_ids)
             person_ids.update(new_person_ids)
@@ -61,7 +69,7 @@ class Database:
             return document
         # TODO: exception
 
-    def add_persons_ids_from_staff(self, staff_groups, person_ids, staff_limit, film_limit):
+    def get_persons_ids_from_staff(self, staff_groups, staff_limit, film_limit):
         if staff_groups is None:
             # TODO: exception
             return
@@ -73,7 +81,7 @@ class Database:
 
         persons = Database.__find_files(
             'personId', list(staff_ids), self.__persons, self.__pool.get_person, Database.__append_document)
-        person_ids.update([person['personId'] for person in persons])
+        return [person['personId'] for person in persons]
 
     def get_films(self, film_ids):
         return Database.__find_files(
@@ -131,8 +139,9 @@ class Database:
             else:
                 Database._check_status(status, index)
             # TODO: exceptions
-
+        
         for search_id in search_ids:
+            print('sus')
             if is_limit_reached:
                 break
             thread = threading.Thread(target=thread_worker, args=(search_id,))
