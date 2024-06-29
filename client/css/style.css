@@ -1,5 +1,5 @@
 ::selection {
-	background: #726253;
+	background-color: #726253;
 	color: #F4F4F4;
 }
 
@@ -13,156 +13,62 @@ body {
 
 h1, h2, p {
 	margin: 0;
+	padding: 0;
 }
 
-.main-container {
-	display: flex;
-	flex-direction: row;
-	height: 100vh;
-}
-
-.main-info-container {
-	display: flex;
-	align-items: center;
-	background: linear-gradient(135deg, rgba(228, 202, 63, 1.0) 0%, rgba(228, 142, 63, 1.0) 100%);
-	color: #F4F4F4;
-	padding: 0px 79px;
-	width: auto;
-	box-shadow: 4px 0px 16px rgba(0, 0, 0, 0.3);
-}
-
-.main-info-content {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	gap: 50px;
-}
-
-.main-info-text {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	gap: 15px;
-}
-
-.main-title {
-	font-weight: bold;
-	font-size: 72px;
-}
-
-.main-text {
-	font-size: 24px;
-}
-
-.main-line {
-	margin: 0;
-	border: 0px;
-	width: 200px;
-	background-color: #F4F4F4;
-	height: 4px;
-}
-
-.main-log-in-btn {
-	max-width: 200px;
-	padding: 18px 55px;
-	font-weight: bold;
-	font-size: 32px;
-	color: #E48E3F;
+.glowing-button {
+	padding: 18px 56px;
 	border: 2px solid transparent;
 	border-radius: 8px;
-	background-color: #F4F4F4;
-	box-shadow: 0px 0px 16px #F4F4F4;
+	box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
+	color: #F4F4F4;
+	font-size: 32px;
+	font-weight: bold;
 	cursor: pointer;
 	transition: all 0.2s ease;
 }
-.main-log-in-btn:hover {
-	background-color: transparent;
-	border: 2px solid #F4F4F4;
-	box-shadow: none;
-	color: #F4F4F4;
-}
 
-.register-container {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	margin: 0 auto;
-}
-
-.register-title {
-	font-weight: bold;
-	font-size: 64px;
-	color: #E48E3F;
-}
-
-.register-form {
-	margin-top: 120px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.input-fields {
+.auth-container {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	gap: 30px;
+	align-items: center;
 }
 
-.field {
+.auth-field {
 	display: flex;
 	justify-content: space-between;
 	gap: 30px;
 	align-items: center;
+	padding-bottom: 30px;
 }
 
-.field img {
+.auth-icon {
 	width: 35px;
 	height: 35px;
 }
 
-.input-field {
-	border: 2px solid transparent;
+.auth-input {
 	padding: 20px 30px;
-	font-size: 28px;
-	color: #E48E3F;
-	background-color: rgba(228, 192, 63, 0.2);
+	border: 2px solid transparent;
 	border-radius: 8px;
+	background-color: rgba(228, 192, 63, 0.2);
+	color: #E48E3F;
+	font-size: 28px;
 	transition: all 0.1s ease;
 }
-.input-field:focus {
-	border: 2px solid #E48E3F;
+.auth-input:focus {
+	border-color: #E48E3F;
 	border-radius: 8px;
-	box-shadow: 0px 0px 16px rgba(228, 142, 63, 0.2);
+	box-shadow: 0 0 16px rgba(228, 142, 63, 0.2);
 	outline: none;
 }
-.input-field:hover {
-	border: 2px solid #E48E3F;
+.auth-input:hover {
+	border-color: #E48E3F;
 	border-radius: 8px;
-	box-shadow: 0px 0px 16px rgba(228, 142, 63, 0.2);
+	box-shadow: 0 0 16px rgba(228, 142, 63, 0.2);
 }
-.input-field::placeholder {
+.auth-input::placeholder {
 	color: #A5A5A5;
 }
 
-.register-button {
-	margin-top: 120px;
-	display: block;
-	padding: 18px 0px;
-	font-weight: bold;
-	font-size: 32px;
-	color: #F4F4F4;
-	border: 2px solid transparent;
-	border-radius: 8px;
-	background-color: #E48E3F;
-	box-shadow: 0px 0px 16px #E48E3F;
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-.register-button:hover {
-	background-color: transparent;
-	border: 2px solid #E48E3F;
-	box-shadow: none;
-	color: #E48E3F;
-}

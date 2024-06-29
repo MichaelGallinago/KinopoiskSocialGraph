@@ -1,64 +1,54 @@
-.login-modal-overlay {
+.auth-overlay {
     position: fixed;
     top: 0;
     right: 0;
     left: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
-.login-modal-window {
-    max-width: 470px;
-    background: #F4F4F4;
-    border-radius: 8px;
-    padding: 0 56px 40px 56px;
-    text-align: center;
+.auth-modal-window {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.close-icon {
-    width: 35px;
-    height: 35px;
-    float: right;
-    padding-top: 30px;
-    cursor: pointer;
-}
-
-.login-title {
-    font-weight: bold;
-    font-size: 48px;
-    color: #E48E3F;
-    padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    max-width: 470px;
+    background-color: #F4F4F4;
+    border-radius: 8px;
+    padding: 0 56px 40px 56px;
     text-align: center;
 }
 
+.close-icon {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+}
+
+.login-title {
+    color: #E48E3F;
+    font-size: 48px;
+    font-weight: bold;
+    padding-top: 40px;
+}
+
 .login-form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     margin-top: 52px;
 }
 
 .login-button {
-    margin-top: 30px;
+    margin-top: 22px;
     display: block;
-    padding: 18px 0;
-    font-weight: bold;
-    font-size: 32px;
-    color: #F4F4F4;
-    border: 2px solid transparent;
-    border-radius: 8px;
     background-color: #E48E3F;
-    box-shadow: 0 0 16px #E48E3F;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 .login-button:hover {
     background-color: transparent;
-    border: 2px solid #E48E3F;
+    border-color: #E48E3F;
     box-shadow: none;
     color: #E48E3F;
 }
