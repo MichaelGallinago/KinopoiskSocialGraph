@@ -1,0 +1,5 @@
+﻿flask
+flask_pymongo
+email-validator
+werkzeug
+gunicorn
