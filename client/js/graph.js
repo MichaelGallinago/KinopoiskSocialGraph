@@ -31,17 +31,22 @@ async function loadGraph(personId) {
     }
 }
 
-fetch('http://localhost:8080/js/data.json')
-    .then(response => response.json())
-    .then(data => {
-        drawGraph(data);
-    })
-    .catch(error => console.error('Ошибка получения данных:', error));
-
 function drawGraph(data) {
     const nodeNames = data.nodes.map(node => node.name)
     const ids = data.nodes.map(node => node.id)
-    const edgeLabels = data.edges.map(edge => edge.movie)
+    const movies = data.edges.map(edge => edge.movie)
+    const edgeLabels = []
+    for (let i = 0; i < movies.length; i++) {
+        if (typeof movies[i] == 'object') {
+            let info = ''
+            for (let j = 0; j < movies[i].length; j++) {
+                info += `${movies[i][j]}<br>`
+            }
+            edgeLabels.push(info)
+        } else {
+            edgeLabels.push(movies[i])
+        }
+    }
 
     const minId = Math.min(...ids.values())
     const maxId = Math.max(...ids.values())
@@ -80,10 +85,6 @@ function drawGraph(data) {
         nodeTrace.z.push(coord[2])
     }
 
-    console.log('nodeTrace.x: ' + nodeTrace.x)
-    console.log('nodeTrace.y: ' + nodeTrace.y)
-    console.log('nodeTrace.z: ' + nodeTrace.z)
-
     const edgeTrace = {
         type: 'scatter3d',
         x: [],
@@ -105,11 +106,6 @@ function drawGraph(data) {
         edgeTrace.y.push(coordSource[1], coordTarget[1], null);
         edgeTrace.z.push(coordSource[2], coordTarget[2], null);
     }
-
-
-    console.log('edgeTrace.x: ' + edgeTrace.x)
-    console.log('edgeTrace.y: ' + edgeTrace.y)
-    console.log('edgeTrace.z: ' + edgeTrace.z)
 
     const graphData = [nodeTrace, edgeTrace]
 
