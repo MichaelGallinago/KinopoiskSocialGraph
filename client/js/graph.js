@@ -70,7 +70,7 @@ function drawGraph(data) {
         z: [],
         mode: 'markers',
         marker: {
-            size: 12
+            size: 16
         },
         text: nodeNames,
         hoverinfo: 'text'
@@ -107,9 +107,15 @@ function drawGraph(data) {
         edgeTrace.z.push(coordSource[2], coordTarget[2], null);
     }
 
+    const layout = {
+        autosize: false,
+        width: 1500,
+        height: 1500
+    }
+
     const graphData = [nodeTrace, edgeTrace]
 
-    Plotly.newPlot('graph-container', graphData)
+    Plotly.newPlot('graph-container', graphData, layout)
 }
 
 function getRandomCoordinate(min, max) {
