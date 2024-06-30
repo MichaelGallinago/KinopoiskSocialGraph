@@ -1,0 +1,95 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #F4F4F4;
+}
+
+.admin-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 50px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-title {
+    text-align: center;
+    margin-bottom: 50px;
+    color: #E48E3F;
+}
+
+.admin-section {
+    margin-bottom: 50px;
+}
+
+.admin-section-title {
+    color: #E48E3F;
+    margin-bottom: 20px;
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-field {
+    margin-bottom: 20px;
+}
+
+.admin-label {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.admin-input {
+    padding: 10px;
+    border: 2px solid #E48E3F;
+    border-radius: 5px;
+    font-size: 20px;
+    color: #333;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: #E45B23;
+}
+
+.admin-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #E48E3F;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.admin-button:hover {
+    background-color: #E45B23;
+}
+
+.admin-stat {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.admin-stat-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.admin-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #E48E3F;
+}
