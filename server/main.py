@@ -72,14 +72,10 @@ def make_graph():
     print(data)
     if not data or not all(k in data for k in required_keys):
         return jsonify({"error": "Invalid input"}), 400
-
-    return jsonify(db.get_person_graph(data['personId']))
+    graph = db.get_person_graph(data['personId'], 3, 3, 2)
+    print(graph)
+    return jsonify(graph)
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-    # database = Database()
-    # 513, 110, 6141, 34549
-    # graph = database.get_person_graph(34549, 3, 5, 10)
-    # print(len(graph))
-    # database.close()

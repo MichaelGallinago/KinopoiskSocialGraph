@@ -101,7 +101,7 @@ class Database:
             'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
 
     def get_person(self, person_id):
-        document = self.__persons.find_one({"personId": person_id})
+        document = self.__persons.find_one({"personId": 513})
 
         if document is not None:
             return document
