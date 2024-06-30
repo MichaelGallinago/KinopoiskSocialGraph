@@ -64,7 +64,7 @@ async function auth(login, password) {
 
         if (response.ok) {
             const data = await response.json()
-            window.location.href = 'profile.html'
+            window.location.href = 'graph.html'
         } else {
             alert('Ошибка авторизации: ' + response.status)
         }
