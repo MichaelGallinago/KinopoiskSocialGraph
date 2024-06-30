@@ -74,8 +74,7 @@ def make_graph():
     if not data or not all(k in data for k in required_keys):
         return jsonify({"error": "Invalid input"}), 400
 
-    graph = db.get_person_graph(data['personId'], 3, 5, 7)
-    print('ura sdelal')
+    graph = db.get_person_graph(data['personId'], 3, 5, 3)
 
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 
@@ -93,7 +92,6 @@ def generate_graph_stream(graph):
     for edge in graph['edges']:
         if not first_item:
             yield ','
-        edge['movie'] = [len(edge['movie'])] + edge['movie']
         yield json.dumps(edge)
         first_item = False
     yield ']}'

@@ -18,8 +18,6 @@ class Database:
         ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
         cursor = self.__persons.find({'personId': {'$in': list(ids)}})
 
-        print(len(ids))
-
         # Обработка данных
         nodes = []
         edges = []
