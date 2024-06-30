@@ -31,13 +31,6 @@ async function loadGraph(personId) {
     }
 }
 
-fetch('http://localhost:8080/js/data.json')
-    .then(response => response.json())
-    .then(data => {
-        drawGraph(data);
-    })
-    .catch(error => console.error('Ошибка получения данных:', error));
-
 function drawGraph(data) {
     const nodeNames = data.nodes.map(node => node.name)
     const ids = data.nodes.map(node => node.id)

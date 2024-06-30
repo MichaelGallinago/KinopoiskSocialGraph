@@ -10,6 +10,7 @@ from email_validator import validate_email, EmailNotValidError
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
 mongo = PyMongo(app)
+db = Database(mongo.db)
 CORS(app)
 
 
@@ -47,18 +48,18 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    if not data or not all(k in data for k in ("username", "password")):
+    if not data or not all(k in data for k in ("login", "password")):
         return jsonify({"error": "Invalid input"}), 400
 
-    username = data['username']
+    username = data['login']
     password = data['password']
 
     if not username or not password:
         return jsonify({"error": "Fields cannot be empty"}), 400
 
-    user = mongo.db.users.find_one({"username": username})
+    user = mongo.db.users.find_one({"login": username})
     if not user or not check_password_hash(user['password'], password):
-        return jsonify({"error": "Invalid username or password"}), 400
+        return jsonify({"error": "Invalid login or password"}), 400
 
     return jsonify({"message": "Login successful"}), 200
 
@@ -66,12 +67,13 @@ def login():
 @app.route('/make_graph', methods=['POST'])
 def make_graph():
     data = request.json
-    required_keys = ['person_id', 'steps', 'staff_limit', 'film_limit']
-
-    if not data or not all(key in data and isinstance(data[key], int) for key in required_keys):
+    # required_keys = ['personId', 'steps', 'staffLimit', 'filmLimit']
+    required_keys = ['personId']
+    print(data)
+    if not data or not all(k in data for k in required_keys):
         return jsonify({"error": "Invalid input"}), 400
 
-    return jsonify({"message": "hello"})
+    return jsonify(db.get_person_graph(data['personId']))
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 import threading
 import time
+from collections import defaultdict
 
-from pymongo import MongoClient
 from parser_pool import ParserPool
 
 is_limit_reached = False
@@ -9,16 +9,57 @@ is_limit_reached = False
 
 class Database:
 
-    def __init__(self):
-        self.__client = MongoClient('mongodb://localhost:27017/')
-        self.__db = self.__client['ksg']
+    def __init__(self, db):
+        self.__db = db
         self.__pool = ParserPool()
         self.__init_collections()
 
-    def close(self):
-        self.__client.close()
-
     def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=10):
+        ids = self.__get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
+        cursor = self.__persons.find({'personId': {'$in': list(ids)}})
+
+        # Обработка данных
+        nodes = []
+        edges = []
+        actor_index = {}
+        film_to_actors = defaultdict(list)
+
+        # Создание узлов и построение карты актёров
+        for doc in cursor:
+            person_id = doc["personId"]
+            name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
+            nodes.append({"id": person_id, "name": name})
+            actor_index[person_id] = name
+
+            for film in doc["films"]:
+                film_id = film["filmId"]
+                film_name = film["nameRu"] if film["nameRu"] else film["nameEn"]
+                film_to_actors[film_id].append({"person_id": person_id, "film_name": film_name})
+
+        # Построение связей
+        processed_pairs = set()
+        for actors in film_to_actors.values():
+            for i in range(len(actors)):
+                for j in range(i + 1, len(actors)):
+                    source = actors[i]["person_id"]
+                    target = actors[j]["person_id"]
+                    film_name = actors[i]["film_name"]
+
+                    if (source, target) not in processed_pairs and (target, source) not in processed_pairs:
+                        processed_pairs.add((source, target))
+                        edges.append({"source": source, "target": target, "movie": [1, film_name]})
+                    else:
+                        for edge in edges:
+                            if (edge["source"] == source and edge["target"] == target) or (
+                                    edge["source"] == target and edge["target"] == source):
+                                edge["movie"].append(film_name)
+                                edge["movie"][0] += 1
+                                break
+
+        # Формирование итогового JSON
+        return {"nodes": nodes, "edges": edges}
+
+    def __get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
         person_ids = set()
         new_person_ids = {root_person_id}
 
@@ -31,7 +72,7 @@ class Database:
                 film_ids.update(self.get_film_ids(person_id)[:film_limit])
 
             cursor = Database.__find_files(
-                    'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
+                'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
 
             new_person_ids.update(self.add_persons_ids_from_staff(cursor, staff_limit))
 
