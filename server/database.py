@@ -1,4 +1,4 @@
-﻿import threading
+import threading
 import time
 
 from pymongo import MongoClient
@@ -26,16 +26,38 @@ class Database:
             search_person_ids = new_person_ids.copy()
             new_person_ids = set()
 
+            film_ids = set()
             for person_id in search_person_ids:
-                film_ids = self.get_film_ids(person_id)
-                staff_groups = Database.__find_files(
+                film_ids.update(self.get_film_ids(person_id)[:film_limit])
+
+            cursor = Database.__find_files(
                     'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
-                self.add_persons_ids_from_staff(staff_groups, new_person_ids, staff_limit, film_limit)
+
+            new_person_ids.update(self.add_persons_ids_from_staff(cursor, staff_limit))
 
             new_person_ids.difference_update(person_ids)
             person_ids.update(new_person_ids)
 
         return person_ids
+
+    def add_persons_ids_from_staff(self, staff_groups_cursors, staff_limit):
+        if staff_groups_cursors is None:
+            # TODO: exception
+            return
+
+        groups = [group['staff'] for group in staff_groups_cursors]
+
+        staff_ids = set()
+        for group in groups:
+            staff_ids.update([person["staffId"] for person in group][:staff_limit])
+
+        persons = Database.__find_files(
+            'personId', list(staff_ids), self.__persons, self.__pool.get_person, Database.__append_document)
+        return [person['personId'] for person in persons]
+
+    def get_films(self, film_ids):
+        return Database.__find_files(
+            'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
 
     def get_person(self, person_id):
         document = self.__persons.find_one({"personId": person_id})
@@ -61,24 +83,6 @@ class Database:
             return document
         # TODO: exception
 
-    def add_persons_ids_from_staff(self, staff_groups, person_ids, staff_limit, film_limit):
-        if staff_groups is None:
-            # TODO: exception
-            return
-
-        groups = [group['staff'] for group in staff_groups][:film_limit]
-        staff_ids = set()
-        for group in groups:
-            staff_ids.update([person["staffId"] for person in group][:staff_limit])
-
-        persons = Database.__find_files(
-            'personId', list(staff_ids), self.__persons, self.__pool.get_person, Database.__append_document)
-        person_ids.update([person['personId'] for person in persons])
-
-    def get_films(self, film_ids):
-        return Database.__find_files(
-            'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
-
     def get_film_ids(self, person_id):
         person_document = self.get_person(person_id)
         if person_document is None:
@@ -94,11 +98,10 @@ class Database:
         found_files_ids = [file[key] for file in found_files]
         missing_ids = list(set([index for index in ids_set if index not in found_files_ids]))
 
-        if len(missing_ids) <= 0 or is_limit_reached:
-            return collection.find({key: {'$in': ids_set}})
+        if len(missing_ids) > 0 and not is_limit_reached:
+            new_files = Database.__get_files_multithread(get_method, missing_ids, append_method)
+            Database.__insert_files(new_files, collection)
 
-        new_files = Database.__get_files_multithread(get_method, missing_ids, append_method)
-        Database.__insert_files(new_files, collection)
         return collection.find({key: {'$in': ids_set}})
 
     @staticmethod
