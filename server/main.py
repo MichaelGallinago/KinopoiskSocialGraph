@@ -1,11 +1,12 @@
 ﻿import socket
 
 from database import Database
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from email_validator import validate_email, EmailNotValidError
+import json
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
@@ -69,12 +70,33 @@ def make_graph():
     data = request.json
     # required_keys = ['personId', 'steps', 'staffLimit', 'filmLimit']
     required_keys = ['personId']
-    print(data)
+
     if not data or not all(k in data for k in required_keys):
         return jsonify({"error": "Invalid input"}), 400
-    graph = db.get_person_graph(data['personId'], 3, 3, 2)
-    print(graph)
-    return jsonify(graph)
+
+    graph = db.get_person_graph(data['personId'], 3, 5, 7)
+    print('ura sdelal')
+
+    return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
+
+
+def generate_graph_stream(graph):
+    yield '{"nodes":['
+    first_item = True
+    for node in graph['nodes']:
+        if not first_item:
+            yield ','
+        yield json.dumps(node)
+        first_item = False
+    yield '],"edges":['
+    first_item = True
+    for edge in graph['edges']:
+        if not first_item:
+            yield ','
+        edge['movie'] = [len(edge['movie'])] + edge['movie']
+        yield json.dumps(edge)
+        first_item = False
+    yield ']}'
 
 
 if __name__ == '__main__':

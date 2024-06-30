@@ -14,9 +14,11 @@ class Database:
         self.__pool = ParserPool()
         self.__init_collections()
 
-    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=10):
-        ids = self.__get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
+    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=7):
+        ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
         cursor = self.__persons.find({'personId': {'$in': list(ids)}})
+
+        print(len(ids))
 
         # Обработка данных
         nodes = []
@@ -28,38 +30,38 @@ class Database:
         for doc in cursor:
             person_id = doc["personId"]
             name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
-            nodes.append({"id": person_id, "name": name})
-            actor_index[person_id] = name
+            if person_id not in actor_index:
+                nodes.append({"id": person_id, "name": name})
+                actor_index[person_id] = name
 
             for film in doc["films"]:
                 film_id = film["filmId"]
                 film_name = film["nameRu"] if film["nameRu"] else film["nameEn"]
-                film_to_actors[film_id].append({"person_id": person_id, "film_name": film_name})
+                film_to_actors[film_id].append((person_id, film_name))
 
         # Построение связей
-        processed_pairs = set()
-        for actors in film_to_actors.values():
+        edges_dict = defaultdict(lambda: defaultdict(set))
+
+        for film_id, actors in film_to_actors.items():
             for i in range(len(actors)):
                 for j in range(i + 1, len(actors)):
-                    source = actors[i]["person_id"]
-                    target = actors[j]["person_id"]
-                    film_name = actors[i]["film_name"]
+                    source = actors[i][0]
+                    target = actors[j][0]
+                    film_name = actors[i][1]
 
-                    if (source, target) not in processed_pairs and (target, source) not in processed_pairs:
-                        processed_pairs.add((source, target))
-                        edges.append({"source": source, "target": target, "movie": [1, film_name]})
-                    else:
-                        for edge in edges:
-                            if (edge["source"] == source and edge["target"] == target) or (
-                                    edge["source"] == target and edge["target"] == source):
-                                edge["movie"].append(film_name)
-                                edge["movie"][0] += 1
-                                break
+                    edges_dict[source][target].add(film_name)
+                    edges_dict[target][source].add(film_name)
+
+        # Преобразование связей в нужный формат
+        for source, targets in edges_dict.items():
+            for target, movies_set in targets.items():
+                movies = list(movies_set)
+                edges.append({"source": source, "target": target, "movie": [len(movies)] + movies})
 
         # Формирование итогового JSON
         return {"nodes": nodes, "edges": edges}
 
-    def __get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
+    def get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
         person_ids = set()
         new_person_ids = {root_person_id}
 
@@ -101,7 +103,7 @@ class Database:
             'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
 
     def get_person(self, person_id):
-        document = self.__persons.find_one({"personId": 513})
+        document = self.__persons.find_one({"personId": int(person_id)})
 
         if document is not None:
             return document
