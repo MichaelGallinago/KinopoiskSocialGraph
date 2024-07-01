@@ -1,3 +1,8 @@
+img {
+    margin: 0;
+    padding: 0;
+}
+
 .loader {
     position: fixed;
     width: 100%;
@@ -34,7 +39,90 @@
     }
 }
 
+.navigation {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 20px 80px;
+    background-color: #222222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 1);
+}
+
+.graph-form {
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+
+.person-id-label {
+    font-size: 20px;
+    color: #F4F4F4;
+}
+
+.person-id-input {
+    width: 200px;
+    height: 40px;
+    border: 2px solid #F4F4F4;
+    border-radius: 8px;
+    background-color: rgba(165, 165, 165, 0.25);
+    font-size: 20px;
+    color: #F4F4F4;
+    text-align: center;
+    transition: all 0.1s ease;
+}
+.person-id-input:focus {
+    box-shadow: 0 0 16px rgba(224, 224, 224, 0.25);
+    outline: none;
+}
+.person-id-input:hover {
+    border-radius: 8px;
+    box-shadow: 0 0 16px rgba(224, 224, 224, 0.25);
+}
+
+.load-graph-btn {
+    width: 148px;
+    height: 40px;
+    background-color: #F0CC0D;
+    box-shadow: 0 0 16px #F0CC0D;
+    border: 2px solid #F0CC0D;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 20px;
+    color: #222;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.load-graph-btn:hover {
+    background-color: transparent;
+    box-shadow: none;
+    color: #F0CC0D;
+}
+
+.right-nav-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+}
+
+.exit-btn {
+    background-color: transparent;
+    background-image: url("../img/exit-icon.png");
+    width: 35px;
+    height: 35px;
+    border: none;
+    cursor: pointer;
+}
+
 #graph-container {
     width: auto;
     height: auto;
+    /* TODO: опустить граф ниже nav-бара */
 }
