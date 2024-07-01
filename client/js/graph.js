@@ -9,7 +9,10 @@ document.getElementById('graph-form').addEventListener('submit', async function 
 })
 
 async function loadGraph(personId) {
+    document.getElementById('graph-container').removeAttribute('.js-plotly-plot')
+
     try {
+        showLoader()
         const response = await fetch(BASE_URL + '/make_graph', {
             method: 'POST',
             headers: {
@@ -23,12 +26,35 @@ async function loadGraph(personId) {
         if (response.ok) {
             const data = await response.json()
             drawGraph(data)
+            hideLoader()
         } else {
+            hideLoader()
             alert('Ошибка при загрузке графа: ' + response.status)
         }
     } catch (error) {
+        hideLoader()
         alert('Произошла ошибка: ' + error)
     }
+
+    // TODO: тест графа
+    /*showLoader()
+    setTimeout(() => {
+        fetch('http://localhost:8080/js/test-data.json')
+            .then(response => response.json())
+            .then(data => {
+                drawGraph(data);
+                hideLoader()
+            })
+            .catch(error => console.error('Ошибка получения данных:', error));
+    }, 3000)*/
+}
+
+function showLoader() {
+    document.querySelector('.loader').classList.remove('loader-hidden')
+}
+
+function hideLoader() {
+    document.querySelector('.loader').classList.add('loader-hidden')
 }
 
 function drawGraph(data) {
@@ -121,4 +147,3 @@ function drawGraph(data) {
 function getRandomCoordinate(min, max) {
     return Math.random()  *  (max - min) + min
 }
-
