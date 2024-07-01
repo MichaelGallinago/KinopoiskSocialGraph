@@ -10,10 +10,20 @@
 </head>
 <body>
     <div class="loader loader-hidden"></div>
-    <form id="graph-form">
-        <label for="person-id">ID человека:</label><input type="text" id="person-id">
-        <button type="submit" id="load-graph">Загрузить</button>
-    </form>
+    <header class="navigation">
+        <img src="img/logo.png" alt="КиноГраф" class="logo">
+        <form id="graph-form" class="graph-form">
+            <span class="person-id-label">ID человека:</span>
+            <input type="text" id="person-id" class="person-id-input" />
+            <button type="submit" id="load-graph" class="load-graph-btn">Загрузить</button>
+        </form>
+        <div class="right-nav-content">
+            <span class="login">
+                <!--TODO: логин-->
+            </span>
+            <button class="exit-btn"></button>
+        </div>
+    </header>
     <div id="graph-container"></div>
     <script src="js/graph.js"></script>
 </body>
