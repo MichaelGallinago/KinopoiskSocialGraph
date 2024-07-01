@@ -74,7 +74,7 @@ def make_graph():
     if not data or not all(k in data for k in required_keys):
         return jsonify({"error": "Invalid input"}), 400
 
-    graph = db.get_person_graph(data['personId'], 3, 5, 3)
+    graph = db.get_person_graph(data['personId'], 1, 5, 3, 40)
 
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 

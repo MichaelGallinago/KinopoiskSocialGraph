@@ -14,17 +14,19 @@ class Database:
         self.__pool = ParserPool()
         self.__init_collections()
 
-    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=7):
+    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=7, min_edges=1):
         ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
+        ids.add(int(root_person_id))
         cursor = self.__persons.find({'personId': {'$in': list(ids)}})
 
-        # Обработка данных
+        print(len(ids))
+
         nodes = []
         edges = []
         actor_index = {}
         film_to_actors = defaultdict(list)
 
-        # Создание узлов и построение карты актёров
+        # Создание узлов и построение графа актёров
         for doc in cursor:
             person_id = doc["personId"]
             name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
@@ -50,13 +52,19 @@ class Database:
                     edges_dict[source][target].add(film_name)
                     edges_dict[target][source].add(film_name)
 
+        person_edges = set()
+
         # Преобразование связей в нужный формат
         for source, targets in edges_dict.items():
             for target, movies_set in targets.items():
                 movies = list(movies_set)
-                edges.append({"source": source, "target": target, "movie": [len(movies)] + movies})
+                count = len(movies)
+                if count >= min_edges:
+                    person_edges.add(source)
+                    person_edges.add(target)
+                    edges.append({"source": source, "target": target, "movie": [count] + movies})
 
-        # Формирование итогового JSON
+        nodes = [person for person in nodes if person["id"] in person_edges]
         return {"nodes": nodes, "edges": edges}
 
     def get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
