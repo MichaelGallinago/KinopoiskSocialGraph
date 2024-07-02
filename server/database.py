@@ -1,4 +1,3 @@
-import itertools
 import threading
 import time
 from collections import defaultdict, deque
@@ -23,9 +22,8 @@ class Database:
         min_edges = int(data['movieMinForEdge'])
 
         ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
-        ids = set(itertools.islice(ids, 500))
 
-        cursor = self.__persons.find(Database.__get_filter_from_data(data, list(ids)))
+        cursor = self.__persons.find(Database.__get_filter_from_data(data, list(ids))).limit(1000)
         root_person = self.__persons.find_one({"personId": root_person_id})
 
         nodes = []
@@ -107,7 +105,7 @@ class Database:
     def __get_filter_from_data(data, ids):
         age_min = data.get('ageLeft')
         age_max = data.get('ageRight')
-        is_alive = data.get('isAlive', None)
+        is_alive = data.get('isAlive')
         has_awards = data.get('awards')
         growth_min = data.get('heightLeft')
         growth_max = data.get('heightRight')
@@ -127,12 +125,11 @@ class Database:
         elif age_max is not None:
             query['age'] = {'$lte': int(age_max)}
 
-        """
-        if is_alive is not None:
-            if is_alive:
-                query['death'] = {'$exists': False}
+        if is_alive is not None and is_alive != 'Все':
+            if is_alive == 'Да':
+                query['death'] = {'$eq': None}
             else:
-                query['death'] = {'$exists': True}
+                query['death'] = {'$ne': None}
 
         if has_awards is not None:
             query['hasAwards'] = {'$gte': int(has_awards)}
@@ -144,18 +141,22 @@ class Database:
         elif growth_max is not None:
             query['growth'] = {'$lte': int(growth_max)}
 
-        if sex is not None and sex != 'Любой':
-            query['sex'] = sex
+        match sex:
+            case 'Мужской':
+                query['sex'] = 'MALE'
+            case 'Женский':
+                query['sex'] = 'FEMALE'
 
-        if films_count is not None:
-            query['films'] = {'$size': int(films_count)}
+        if films_count is not None and int(films_count) > 1:
+            query['films'] = {'$exists': True}
+            query['$expr'] = {'$gte': [{'$size': '$films'}, int(films_count)]}
 
         if profession and profession != 'Все':
             if profession == 'Актер':
-                query['professions'] = {'$regex': 'Актер|Актриса'}
+                query['profession'] = {'$regex': 'Актер|Актриса'}
             else:
-                query['professions'] = {'$regex': profession}
-        """
+                query['profession'] = {'$regex': profession}
+
         return query
 
     def get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
@@ -170,7 +171,7 @@ class Database:
             for person_id in search_person_ids:
                 film_ids.update(self.get_film_ids(person_id)[:film_limit])
 
-            cursor = Database.__find_files(
+            cursor = self.__find_files(
                 'kinopoiskId', film_ids, self.__staff, self.__pool.get_staff, Database.__append_staff)
 
             new_person_ids.update(self.add_persons_ids_from_staff(cursor, staff_limit))
@@ -191,12 +192,12 @@ class Database:
         for group in groups:
             staff_ids.update([person["staffId"] for person in group][:staff_limit])
 
-        persons = Database.__find_files(
+        persons = self.__find_files(
             'personId', list(staff_ids), self.__persons, self.__pool.get_person, Database.__append_document)
         return [person['personId'] for person in persons]
 
     def get_films(self, film_ids):
-        return Database.__find_files(
+        return self.__find_files(
             'kinopoiskId', film_ids, self.__films, self.__pool.get_film, Database.__append_document)
 
     def get_person(self, person_id):
@@ -205,6 +206,7 @@ class Database:
         if document is not None:
             return document
 
+        self.__pool.update()
         status, document = self.__pool.get_person(person_id)
         if status == 200 and document is not None:
             self.__persons.insert_one(document)
@@ -216,6 +218,7 @@ class Database:
         if document is not None:
             return document
 
+        self.__pool.update()
         status, staff = self.__pool.get_staff(film_id)
         if status == 200 and staff is not None:
             document = {"filmId": film_id, "staff": staff}
@@ -231,14 +234,14 @@ class Database:
 
         return list(set([film['filmId'] for film in person_document['films']]))
 
-    @staticmethod
-    def __find_files(key, ids, collection, get_method, append_method):
+    def __find_files(self, key, ids, collection, get_method, append_method):
         ids_set = list(set(ids))
         found_files = collection.find({key: {'$in': ids_set}})
         found_files_ids = [file[key] for file in found_files]
         missing_ids = list(set([index for index in ids_set if index not in found_files_ids]))
 
         if len(missing_ids) > 0 and not is_limit_reached:
+            self.__pool.update()
             new_files = Database.__get_files_multithread(get_method, missing_ids, append_method)
             Database.__insert_files(new_files, collection)
 

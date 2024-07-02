@@ -17,6 +17,7 @@ CORS(app)
 REQUIRED_KEYS = ['personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft', 'ageRight',
                  'isAlive', 'heightLeft', 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
 
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
