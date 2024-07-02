@@ -6,7 +6,8 @@
     <title>КиноГраф</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/graph.css">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="loader loader-hidden"></div>
@@ -14,17 +15,213 @@
         <img src="img/logo.png" alt="КиноГраф" class="logo">
         <form id="graph-form" class="graph-form">
             <span class="person-id-label">ID человека:</span>
-            <input type="text" id="person-id" class="person-id-input" />
+            <input type="text" id="person-id" class="person-id-input" required />
             <button type="submit" id="load-graph" class="load-graph-btn">Загрузить</button>
         </form>
         <div class="right-nav-content">
-            <span class="login">
-                <!--TODO: логин-->
-            </span>
+            <span class="login"></span>
             <button class="exit-btn"></button>
         </div>
     </header>
-    <div id="graph-container"></div>
+    <div class="content">
+        <div class="person-info-container panel">
+            <div class="person-main">
+                <img src="img/test-person-photo.webp" alt="Фото человека" class="person-photo">
+                <div class="person-info-main">
+                    <h2 class="person-name"></h2>
+                    <div class="info-elements">
+                        <div class="info">
+                            <span class="key"></span>
+                            <span class="info-value"></span>
+                        </div>
+                        <div class="info">
+                            <span class="key"></span>
+                            <span class="info-value"></span>
+                        </div>
+                        <div class="info">
+                            <span class="key"></span>
+                            <span class="info-value"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="person-info-more">
+                <h3>О персоне</h3>
+                <div class="info-elements">
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info">
+                        <span class="key"></span>
+                        <span class="info-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="graph-container">
+            <svg width="1200" height="800" id="graph"></svg>
+        </div>
+        <div class="filters-container panel">
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Длина колена</span>
+                    <span class="value" id="depth-text"></span>
+                </div>
+                <input type="range" class="depth-input" min="1" max="5" id="depth-input">
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Лимит людей на фильм</span>
+                    <span class="people-limit-text"></span>
+                </div>
+                <input type="range" class="people-limit-input" min="1" max="100">
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Лимит фильмов на человека</span>
+                    <span class="movie-limit-for-person-text"></span>
+                </div>
+                <input type="range" class="movie-limit-for-person-input" min="1" max="100">
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Минимум фильмов на связь</span>
+                    <span class="movie-min-for-edge-text"></span>
+                </div>
+                <input type="range" class="movie-min-for-edge-input" min="1" max="100">
+            </div>
+            <div class="filter">
+                <span class="key">Возраст</span>
+                <div class="age-filter">
+                    <div class="values">
+                        <span class="value">от</span>
+                        <span class="value" id="left-age-text"></span>
+                    </div>
+                    <div class="values">
+                        <span class="value">до</span>
+                        <span class="value" id="right-age-text"></span>
+                    </div>
+                </div>
+                <div class="age-inputs">
+                    <input type="range" class="age-input-left-range" min="1" max="100" id="left-age-input">
+                    <input type="range" class="age-input-right-range" min="1" max="100" id="right-age-input">
+                </div>
+            </div>
+            <div class="filter">
+                <span class="key">Жив</span>
+                <select class="is-alive-input" id="is-alive-input">
+                    <option>Все</option>
+                    <option>Да</option>
+                    <option>Нет</option>
+                </select>
+            </div>
+            <div class="filter">
+                <span class="key">Рост (см)</span>
+                <div class="height-filter">
+                    <div class="values">
+                        <span class="value">от</span>
+                        <span class="value" id="left-height-text"></span>
+                    </div>
+                    <div class="values">
+                        <span class="value">до</span>
+                        <span class="value" id="right-height-text"></span>
+                    </div>
+                </div>
+                <div class="height-inputs">
+                    <input type="range" class="height-input-left-range" min="1" max="250" id="left-height-input">
+                    <input type="range" class="height-input-right-range" min="1" max="250" id="left-right-input">
+                </div>
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Кол-во наград (min)</span>
+                    <span class="value" id="awards-text"></span>
+                </div>
+                <input type="range" class="awards-input" min="1" max="100" id="awards-input">
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Карьера</span>
+                    <select class="career-input" id="career-input">
+                        <option>Все</option>
+                        <option>Актер</option>
+                        <option>Режиссер</option>
+                        <option>Сценарист</option>
+                        <option>Продюсер</option>
+                        <option>Директор фильма</option>
+                        <option>Композитор</option>
+                        <option>Оператор</option>
+                        <option>Монтажер</option>
+                        <option>Художник</option>
+                        <option>Актер дубляжа</option>
+                        <option>Режиссер дубляжа</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter">
+                <span class="key">Пол</span>
+                <select class="gender-input" id="gender-input">
+                    <option>Любой</option>
+                    <option>Мужской</option>
+                    <option>Женский</option>
+                </select>
+            </div>
+            <div class="filter">
+                <div class="filter-info">
+                    <span class="key">Кол-во фильмов</span>
+                    <span class="value" id="movies-text"></span>
+                </div>
+                <input type="range" class="movies-input" min="1" max="500">
+            </div>
+            <!--<div class="filter">
+                <div class="filter-info">
+                    <span class="key">Знак зодиака</span>
+                    <select name="career" id="zodiac-sign-input" class="zodiac-sign-input">
+                        <option value="aries">Овен</option>
+                        <option value="taurus">Телец</option>
+                        <option value="gemini">Близнецы</option>
+                        <option value="cancer">Рак</option>
+                        <option value="leo">Лев</option>
+                        <option value="virgo">Дева</option>
+                        <option value="libra">Весы</option>
+                        <option value="scorpio">Скорпион</option>
+                        <option value="sagittarius">Стрелец</option>
+                        <option value="capricorn">Козерог</option>
+                        <option value="aquarius">Водолей</option>
+                        <option value="pisces">Рыбы</option>
+                    </select>
+                </div>
+            </div>-->
+            <!--<div class="filter">
+                <div class="filter-info">
+                    <span class="key">Жанр</span>
+                    <select name="genre" id="genre-input" class="genre-input">
+                        <option value="drama">Драма</option>
+                        <option value="comedy">Комедия</option>
+                        <option value="adventures">Приключения</option>
+                        &lt;!&ndash; TODO: добавить больше жанров &ndash;&gt;
+                    </select>
+                </div>
+            </div>-->
+        </div>
+    </div>
     <script src="js/graph.js"></script>
 </body>
 </html>
