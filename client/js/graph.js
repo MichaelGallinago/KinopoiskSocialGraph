@@ -23,7 +23,7 @@ $('.movie-limit-for-person-input').on('input', function () {
 }).trigger('input')
 
 $('.movie-min-for-edge-input').on('input', function () {
-    $('.movie-limit-for-edge-text').text(this.value)
+    $('.movie-min-for-edge-text').text(this.value)
 }).trigger('input')
 
 $('.age-input-left-range').on('input', function() {
