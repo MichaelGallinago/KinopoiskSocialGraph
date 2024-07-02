@@ -32,6 +32,7 @@
     border-radius: 8px;
     padding: 0 56px 40px 56px;
     text-align: center;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
 }
 
 .close-icon {
@@ -44,7 +45,7 @@
 }
 
 .login-title {
-    color: #E48E3F;
+    color: #404040;
     font-size: 48px;
     font-weight: bold;
     padding-top: 40px;
@@ -57,11 +58,13 @@
 .login-button {
     margin-top: 22px;
     display: block;
-    background-color: #E48E3F;
+    background-color: #F0CC0D;
+    color: #404040;
+    width: 100%;
 }
 .login-button:hover {
     background-color: transparent;
-    border-color: #E48E3F;
+    border-color: #F0CC0D;
     box-shadow: none;
-    color: #E48E3F;
+    color: #F0CC0D;
 }

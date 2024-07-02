@@ -4,13 +4,21 @@
     height: 100vh;
 }
 
+.logo {
+    position: absolute;
+    margin-left: 173px;
+    margin-top: 80px;
+}
+
 .main-info-container {
     display: flex;
     align-items: center;
-    padding: 0 80px;
-    width: auto;
-    background: linear-gradient(135deg, rgba(228, 202, 63, 1.0) 0%, rgba(228, 142, 63, 1.0) 100%);
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+    width: 50%;
+    height: auto;
+    padding-left: 173px;
+    background-image: url('../img/main-bg.png');
+    background-repeat: no-repeat;
+    background-size: cover;
     color: #F4F4F4;
 }
 
@@ -37,7 +45,7 @@
 .main-log-in-btn {
     margin-top: 50px;
     background-color: #F4F4F4;
-    color: #E48E3F;
+    color: #BF4E0E;
 }
 .main-log-in-btn:hover {
     background-color: transparent;
@@ -47,7 +55,7 @@
 }
 
 .register-container {
-    margin: 0 auto;
+    width: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -55,7 +63,7 @@
 }
 
 .register-title {
-    color: #E48E3F;
+    color: #404040;
     font-size: 64px;
     font-weight: bold;
 }
@@ -67,11 +75,11 @@
 .register-button {
     margin-top: 90px;
     display: block;
-    background-color: #E48E3F;
+    background-color: #BF4E0E;
 }
 .register-button:hover {
     background-color: transparent;
-    border-color: #E48E3F;
+    border-color: #BF4E0E;
     box-shadow: none;
-    color: #E48E3F;
+    color: #BF4E0E;
 }
