@@ -52,21 +52,21 @@ h1, h2, h3, p, span {
 	padding: 20px 30px;
 	border: 2px solid transparent;
 	border-radius: 8px;
-	background-color: rgba(228, 192, 63, 0.2);
-	color: #E48E3F;
+	background-color: rgba(240, 204, 13, 0.2);
+	color: #404040;
 	font-size: 28px;
 	transition: all 0.1s ease;
 }
 .auth-input:focus {
-	border-color: #E48E3F;
+	border-color: #F0CC0D;
 	border-radius: 8px;
-	box-shadow: 0 0 16px rgba(228, 142, 63, 0.2);
+	box-shadow: 0 0 16px rgba(240, 204, 13, 0.5);
 	outline: none;
 }
 .auth-input:hover {
-	border-color: #E48E3F;
+	border-color: #F0CC0D;
 	border-radius: 8px;
-	box-shadow: 0 0 16px rgba(228, 142, 63, 0.2);
+	box-shadow: 0 0 16px rgba(240, 204, 13, 0.5);
 }
 .auth-input::placeholder {
 	color: #A5A5A5;
