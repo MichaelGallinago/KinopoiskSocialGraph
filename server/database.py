@@ -1,6 +1,7 @@
+import itertools
 import threading
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from parser_pool import ParserPool
 
@@ -14,15 +15,22 @@ class Database:
         self.__pool = ParserPool()
         self.__init_collections()
 
-    def get_person_graph(self, root_person_id, steps=3, staff_limit=5, film_limit=7, min_edges=1):
+    def get_person_graph(self, data):
+        root_person_id = int(data['personId'])
+        steps = int(data['depth'])
+        staff_limit = int(data['peopleLimit'])
+        film_limit = int(data['movieLimitForPerson'])
+        min_edges = int(data['movieMinForEdge'])
+
         ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
-        ids.add(int(root_person_id))
-        cursor = self.__persons.find({'personId': {'$in': list(ids)}})
+        ids = set(itertools.islice(ids, 1000))
+        ids.add(root_person_id)
 
         print(len(ids))
 
+        cursor = self.__persons.find(Database.__get_filter_from_data(data, list(ids)))
+
         nodes = []
-        edges = []
         actor_index = {}
         film_to_actors = defaultdict(list)
 
@@ -53,6 +61,7 @@ class Database:
                     edges_dict[target][source].add(film_name)
 
         person_edges = set()
+        edges = []
 
         # Преобразование связей в нужный формат
         for source, targets in edges_dict.items():
@@ -64,8 +73,86 @@ class Database:
                     person_edges.add(target)
                     edges.append({"source": source, "target": target, "movie": [count] + movies})
 
-        nodes = [person for person in nodes if person["id"] in person_edges]
+        # Найти все узлы, которые связаны с корневым узлом
+        def bfs_connected_component(graph, root):
+            visited = set()
+            queue = deque([root])
+            while queue:
+                node = queue.popleft()
+                if node not in visited:
+                    visited.add(node)
+                    neighbors = graph[node] - visited
+                    queue.extend(neighbors)
+            return visited
+
+        # Построить граф в виде словаря для обхода
+        graph = defaultdict(set)
+        for edge in edges:
+            source = edge['source']
+            target = edge['target']
+            graph[source].add(target)
+            graph[target].add(source)
+
+        # Найти все узлы, которые связаны с корневым узлом
+        connected_nodes = bfs_connected_component(graph, root_person_id)
+
+        nodes = [person for person in nodes if person["id"] in connected_nodes]
+        edges = [edge for edge in edges if edge["source"] in connected_nodes and edge["target"] in connected_nodes]
         return {"nodes": nodes, "edges": edges}
+
+    @staticmethod
+    def __get_filter_from_data(data, ids):
+        age_min = data.get('ageLeft')
+        age_max = data.get('ageRight')
+        is_alive = data.get('isAlive', None)
+        has_awards = data.get('awards')
+        growth_min = int(data.get('heightLeft'))
+        growth_max = int(data.get('heightRight'))
+        sex = data.get('gender')
+        films_count = data.get('countOfMovies')
+        profession = data.get('career')
+
+        query = {}
+
+        if ids:
+            query['personId'] = {'$in': ids}
+
+        if age_min is not None and age_max is not None:
+            query['age'] = {'$gte': int(age_min), '$lte': int(age_max)}
+        elif age_min is not None:
+            query['age'] = {'$gte': int(age_min)}
+        elif age_max is not None:
+            query['age'] = {'$lte': int(age_max)}
+
+        if is_alive is not None:
+            if is_alive:
+                query['death'] = {'$exists': False}
+            else:
+                query['death'] = {'$exists': True}
+
+        if has_awards is not None:
+            query['hasAwards'] = {'$gte': int(has_awards)}
+
+        if growth_min is not None and growth_max is not None:
+            query['growth'] = {'$gte': growth_min, '$lte': growth_max}
+        elif growth_min is not None:
+            query['growth'] = {'$gte': growth_min}
+        elif growth_max is not None:
+            query['growth'] = {'$lte': growth_max}
+
+        if sex is not None:
+            query['sex'] = sex
+
+        if films_count is not None:
+            query['films'] = {'$size': int(films_count)}
+
+        if profession:
+            if profession == 'Актер':
+                query['professions'] = {'$regex': 'Актер|Актриса'}
+            else:
+                query['professions'] = {'$regex': profession}
+
+        return query
 
     def get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
         person_ids = set()

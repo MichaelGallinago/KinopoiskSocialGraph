@@ -14,6 +14,8 @@ mongo = PyMongo(app)
 db = Database(mongo.db)
 CORS(app)
 
+REQUIRED_KEYS = ['personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft', 'ageRight',
+                 'isAlive', 'heightLeft', 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -68,13 +70,11 @@ def login():
 @app.route('/make_graph', methods=['POST'])
 def make_graph():
     data = request.json
-    # required_keys = ['personId', 'steps', 'staffLimit', 'filmLimit']
-    required_keys = ['personId']
 
-    if not data or not all(k in data for k in required_keys):
+    if not data or not all(k in data for k in REQUIRED_KEYS):
         return jsonify({"error": "Invalid input"}), 400
 
-    graph = db.get_person_graph(data['personId'], 1, 5, 3, 40)
+    graph = db.get_person_graph(data)
 
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 
