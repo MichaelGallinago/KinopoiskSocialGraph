@@ -94,7 +94,7 @@ async function loadGraph(personId) {
     // TODO: тест графа
     /*showLoader()
     setTimeout(() => {
-        fetch('http://localhost:8080/js/test-data-2.json')
+        fetch('http://localhost:8080/js/test-data-1.json')
             .then(response => response.json())
             .then(data => {
                 drawGraph(data);
@@ -147,7 +147,11 @@ function drawGraph(data, personId) {
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
-            .on("end", dragended));
+            .on("end", dragended))
+        .on("click", function(event, d) {
+            console.log(d.id)
+            // TODO: получение информации о человеке по id
+        })
 
     node.append("title")
         .text(d => d.name);
