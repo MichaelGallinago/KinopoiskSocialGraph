@@ -75,7 +75,6 @@ def make_graph():
         return jsonify({"error": "Invalid input"}), 400
 
     graph = db.get_person_graph(data)
-
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 
 

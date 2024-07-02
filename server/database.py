@@ -23,29 +23,19 @@ class Database:
         min_edges = int(data['movieMinForEdge'])
 
         ids = self.get_person_graph_persons(root_person_id, steps, staff_limit, film_limit)
-        ids = set(itertools.islice(ids, 1000))
-        ids.add(root_person_id)
-
-        print(len(ids))
+        ids = set(itertools.islice(ids, 500))
 
         cursor = self.__persons.find(Database.__get_filter_from_data(data, list(ids)))
+        root_person = self.__persons.find_one({"personId": root_person_id})
 
         nodes = []
         actor_index = {}
         film_to_actors = defaultdict(list)
 
         # Создание узлов и построение графа актёров
+        Database.__add_node(root_person, actor_index, nodes, film_to_actors)
         for doc in cursor:
-            person_id = doc["personId"]
-            name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
-            if person_id not in actor_index:
-                nodes.append({"id": person_id, "name": name})
-                actor_index[person_id] = name
-
-            for film in doc["films"]:
-                film_id = film["filmId"]
-                film_name = film["nameRu"] if film["nameRu"] else film["nameEn"]
-                film_to_actors[film_id].append((person_id, film_name))
+            Database.__add_node(doc, actor_index, nodes, film_to_actors)
 
         # Построение связей
         edges_dict = defaultdict(lambda: defaultdict(set))
@@ -96,9 +86,22 @@ class Database:
         # Найти все узлы, которые связаны с корневым узлом
         connected_nodes = bfs_connected_component(graph, root_person_id)
 
-        nodes = [person for person in nodes if person["id"] in connected_nodes]
+        nodes = [person for person in nodes if (person["id"] in connected_nodes)]
         edges = [edge for edge in edges if edge["source"] in connected_nodes and edge["target"] in connected_nodes]
         return {"nodes": nodes, "edges": edges}
+
+    @staticmethod
+    def __add_node(doc, actor_index, nodes, film_to_actors):
+        person_id = doc["personId"]
+        name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
+        if person_id not in actor_index:
+            nodes.append({"id": person_id, "name": name})
+            actor_index[person_id] = name
+
+            for film in doc["films"]:
+                film_id = film["filmId"]
+                film_name = film["nameRu"] if film["nameRu"] else film["nameEn"]
+                film_to_actors[film_id].append((person_id, film_name))
 
     @staticmethod
     def __get_filter_from_data(data, ids):
@@ -106,8 +109,8 @@ class Database:
         age_max = data.get('ageRight')
         is_alive = data.get('isAlive', None)
         has_awards = data.get('awards')
-        growth_min = int(data.get('heightLeft'))
-        growth_max = int(data.get('heightRight'))
+        growth_min = data.get('heightLeft')
+        growth_max = data.get('heightRight')
         sex = data.get('gender')
         films_count = data.get('countOfMovies')
         profession = data.get('career')
@@ -124,6 +127,7 @@ class Database:
         elif age_max is not None:
             query['age'] = {'$lte': int(age_max)}
 
+        """
         if is_alive is not None:
             if is_alive:
                 query['death'] = {'$exists': False}
@@ -134,24 +138,24 @@ class Database:
             query['hasAwards'] = {'$gte': int(has_awards)}
 
         if growth_min is not None and growth_max is not None:
-            query['growth'] = {'$gte': growth_min, '$lte': growth_max}
+            query['growth'] = {'$gte': int(growth_min), '$lte': int(growth_max)}
         elif growth_min is not None:
-            query['growth'] = {'$gte': growth_min}
+            query['growth'] = {'$gte': int(growth_min)}
         elif growth_max is not None:
-            query['growth'] = {'$lte': growth_max}
+            query['growth'] = {'$lte': int(growth_max)}
 
-        if sex is not None:
+        if sex is not None and sex != 'Любой':
             query['sex'] = sex
 
         if films_count is not None:
             query['films'] = {'$size': int(films_count)}
 
-        if profession:
+        if profession and profession != 'Все':
             if profession == 'Актер':
                 query['professions'] = {'$regex': 'Актер|Актриса'}
             else:
                 query['professions'] = {'$regex': profession}
-
+        """
         return query
 
     def get_person_graph_persons(self, root_person_id, steps, staff_limit, film_limit):
