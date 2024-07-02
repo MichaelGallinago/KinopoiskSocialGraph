@@ -41,6 +41,8 @@ async function register(login, email, password) {
 
         if (response.ok) {
             alert('Регистрация прошла успешно!')
+            localStorage.setItem('login', login)
+            window.location.href = 'graph.html'
         } else {
             alert('Ошибка регистрации: ' + response.status)
         }
@@ -64,6 +66,7 @@ async function auth(login, password) {
 
         if (response.ok) {
             const data = await response.json()
+            localStorage.setItem('login', login)
             window.location.href = 'graph.html'
         } else {
             alert('Ошибка авторизации: ' + response.status)
