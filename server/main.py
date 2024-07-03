@@ -79,7 +79,7 @@ def make_graph():
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 
 
-@app.route('/get_person', methods=['GET'])
+@app.route('/get_person', methods=['POST'])
 def get_person():
     data = request.json
 
