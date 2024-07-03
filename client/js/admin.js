@@ -74,3 +74,54 @@ function getStats() {
 }
 
 getStats();
+
+// это пример, надо поменять на реальные данные
+const newUsersData = {
+  labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+  datasets: [{
+    label: 'Новых пользователей',
+    data: [12, 19, 3, 5, 2, 3, 7],
+    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+    borderColor: 'rgba(75, 192, 192, 1)',
+    borderWidth: 1
+  }]
+};
+
+const visitsData = {
+  labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+  datasets: [{
+    label: 'Посещений',
+    data: [25, 32, 18, 22, 15, 28, 35],
+    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+    borderColor: 'rgba(153, 102, 255, 1)',
+    borderWidth: 1
+  }]
+};
+
+
+const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
+const newUsersChart = new Chart(newUsersCtx, {
+  type: 'bar',
+  data: newUsersData,
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+const visitsCtx = document.getElementById('visitsChart').getContext('2d');
+const visitsChart = new Chart(visitsCtx, {
+  type: 'line',
+  data: visitsData,
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
