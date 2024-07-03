@@ -138,8 +138,9 @@ img {
     top: 0;
     bottom: 0;
     margin-top: 80px;
+    min-width: 450px;
     width: auto;
-    max-width: 500px;
+    max-width: 600px;
     overflow-y: auto;
     background: #E8E8E8;
 }
@@ -155,8 +156,8 @@ img {
 }
 
 .person-photo {
-    width: 200px;
-    height: 298px;
+    max-width: 200px;
+    max-height: 298px;
 }
 
 .person-info-main {
@@ -169,6 +170,7 @@ img {
     font-weight: bold;
     font-size: 32px;
     color: #222222;
+    white-space: pre-wrap;
 }
 
 .info-elements {
