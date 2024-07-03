@@ -79,6 +79,22 @@ def make_graph():
     return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
 
 
+@app.route('/get_person', methods=['GET'])
+def get_person():
+    data = request.json
+
+    if not data or not all(k in data for k in ("personId",)):
+        return jsonify({"error": "Invalid input"}), 400
+
+    person_id = data['personId']
+
+    if not person_id:
+        return jsonify({"error": "Fields cannot be empty"}), 400
+
+    file = db.get_person_main_info(int(person_id))
+    return jsonify(file), 200
+
+
 def generate_graph_stream(graph):
     yield '{"nodes":['
     first_item = True

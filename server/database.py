@@ -212,6 +212,15 @@ class Database:
             self.__persons.insert_one(document)
         # TODO: exception
 
+    def get_person_main_info(self, person_id):
+        file = self.get_person(person_id)
+        del file['_id']
+        del file['facts']
+
+        file['films'] = len(file['films'])
+        file['spouses'] = len(file['spouses'])
+        return file
+
     def get_staff(self, film_id):
         document = self.__staff.find_one({"filmId": film_id})
 
