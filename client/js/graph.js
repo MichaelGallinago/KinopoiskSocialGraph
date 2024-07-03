@@ -58,7 +58,7 @@ $('.movies-input').on('input', function () {
 async function loadGraph(personId) {
     document.getElementById('graph').innerHTML = ''
 
-    /*try {
+    try {
         showLoader()
         const response = await fetch(BASE_URL + '/make_graph', {
             method: 'POST',
@@ -94,19 +94,16 @@ async function loadGraph(personId) {
     } catch (error) {
         hideLoader()
         alert('Произошла ошибка: ' + error)
-    }*/
+    }
 
     // TODO: тест графа
-    showLoader()
-    setTimeout(() => {
-        fetch('http://localhost:8080/js/test-data-1.json')
-            .then(response => response.json())
-            .then(data => {
-                drawGraph(data, personId);
-                hideLoader()
-            })
-            .catch(error => console.error('Ошибка получения данных:', error));
-    }, 3000)
+    /*fetch('http://localhost:8080/js/test-data-1.json')
+        .then(response => response.json())
+        .then(data => {
+            drawGraph(data, personId);
+            hideLoader()
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function drawGraph(data, personId) {
@@ -154,7 +151,6 @@ function drawGraph(data, personId) {
             .on("drag", dragged)
             .on("end", dragended))
         .on("click", function(event, d) {
-            console.log(d.id)
             getPersonInfo(d.id)
         })
 
@@ -205,5 +201,73 @@ function hideLoader() {
 }
 
 async function getPersonInfo(personId) {
+    try {
+        const response = await fetch(BASE_URL + '/get_person', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                personId: personId
+            })
+        })
 
+        if (response.ok) {
+            const data = await response.json()
+            fillPersonInfo(data)
+        } else {
+            alert('Ошибка при загрузке данных о персоне: ' + response.status)
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
+    }
+
+    /*fetch('http://localhost:8080/js/test-person-data.json')
+        .then(response => response.json())
+        .then(data => {
+            fillPersonInfo(data);
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
+}
+
+function fillPersonInfo(data) {
+    const personPhoto = $('.person-photo')
+    const personName = $('.person-name')
+    const personInfoMain = $('.person-info-main')
+    const personInfoMore = $('.person-info-more')
+
+    personPhoto.attr('src', '')
+    personName.text('')
+    $('.info-elements').empty()
+
+    personPhoto.attr('src', data.posterUrl)
+    personName.text(`${data.nameRu} - ${data.nameEn}`)
+
+    personInfoMain.find('.info-elements').append(
+        createInfo('Возраст', data.age),
+        createInfo('Пол', data.sex == 'MALE' ? 'Мужской' : 'Женский'),
+        createInfo('Место рождения', data.birthplace),
+        createInfo('Кол-во фильмов', data.films),
+        createInfo('Кол-во наград', data.hasAwards)
+    )
+
+    personInfoMore.find('.info-elements').append(
+        createInfo('ID', data.personId),
+        createInfo('Профессия', data.profession),
+        createInfo('Дата рождения', data.birthday),
+        createInfo('Рост (см)', data.growth),
+        createInfo('Супруги', data.spouses),
+        createInfo('Умер', data.death == 'None' ? 'Нет' : data.death),
+        createInfo('Место смерти', data.deathplace == 'None' ? 'Нет' : data.deathplace),
+        createInfo('Ссылка', `<a href="${data.webUrl}" target="_blank">${data.webUrl}</a>`)
+    )
+
+    function createInfo(key, value) {
+        return $(`
+            <div class="info">
+                <span class="key">${key}</span>
+                <span class="info-value">${value}</span>
+            </div>
+        `)
+    }
 }
