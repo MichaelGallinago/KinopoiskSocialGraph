@@ -161,7 +161,7 @@ function drawGraph(data, personId) {
         console.log(typeof d.id)
         return d.id === parseInt(personId)
     })
-    personNode.classed('person-node', true)
+    personNode.attr('class', 'person-node')
 
     simulation.on("tick", () => {
         link
