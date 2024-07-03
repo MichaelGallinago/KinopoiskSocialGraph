@@ -102,7 +102,7 @@ async function loadGraph(personId) {
         fetch('http://localhost:8080/js/test-data-1.json')
             .then(response => response.json())
             .then(data => {
-                drawGraph(data);
+                drawGraph(data, personId);
                 hideLoader()
             })
             .catch(error => console.error('Ошибка получения данных:', error));
@@ -110,12 +110,12 @@ async function loadGraph(personId) {
 }
 
 function drawGraph(data, personId) {
-    const svg = d3.select("svg"),
-        width = +svg.attr("width"),
-        height = +svg.attr("height");
+    const svg = d3.select("svg")
+    let width = +svg.attr("width")
+    let height = +svg.attr("height")
 
-    const centerX = width / 2;
-    const centerY = height / 2;
+    let centerX = width / 2;
+    let centerY = height / 2;
 
     const maxCommonMovies = data.edges.reduce((maxCount, edge) => {
         const filmCount = Array.isArray(edge.movie) ? edge.movie.length : 1;
