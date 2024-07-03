@@ -230,7 +230,7 @@ img {
 .link {
     fill: none;
     stroke: #222222;
-    stroke-width: 4px;
+    stroke-width: 1px;
 }
 
 .filters-container {
