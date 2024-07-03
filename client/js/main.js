@@ -52,7 +52,7 @@ async function register(login, email, password) {
 }
 
 async function auth(login, password) {
-    try {
+    /*try {
         const response = await fetch(BASE_URL + '/login', {
             method: 'POST',
             headers: {
@@ -73,5 +73,8 @@ async function auth(login, password) {
         }
     } catch (error) {
         alert('Произошла ошибка: ' + error)
-    }
+    }*/
+
+    localStorage.setItem('login', login)
+    window.location.href = 'graph.html'
 }

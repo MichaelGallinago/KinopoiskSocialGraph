@@ -10,6 +10,11 @@ document.getElementById('graph-form').addEventListener('submit', async function 
     await loadGraph(personId)
 })
 
+$('.exit-btn').on('click', function () {
+    localStorage.clear()
+    window.location.href = 'index.html'
+})
+
 $('.depth-input').on('input', function() {
     $('#depth-text').text(this.value)
 }).trigger('input')
@@ -53,7 +58,7 @@ $('.movies-input').on('input', function () {
 async function loadGraph(personId) {
     document.getElementById('graph').innerHTML = ''
 
-    try {
+    /*try {
         showLoader()
         const response = await fetch(BASE_URL + '/make_graph', {
             method: 'POST',
@@ -89,10 +94,10 @@ async function loadGraph(personId) {
     } catch (error) {
         hideLoader()
         alert('Произошла ошибка: ' + error)
-    }
+    }*/
 
     // TODO: тест графа
-    /*showLoader()
+    showLoader()
     setTimeout(() => {
         fetch('http://localhost:8080/js/test-data-1.json')
             .then(response => response.json())
@@ -101,7 +106,7 @@ async function loadGraph(personId) {
                 hideLoader()
             })
             .catch(error => console.error('Ошибка получения данных:', error));
-    }, 3000)*/
+    }, 3000)
 }
 
 function drawGraph(data, personId) {
@@ -150,7 +155,7 @@ function drawGraph(data, personId) {
             .on("end", dragended))
         .on("click", function(event, d) {
             console.log(d.id)
-            // TODO: получение информации о человеке по id
+            getPersonInfo(d.id)
         })
 
     node.append("title")
@@ -197,4 +202,8 @@ function showLoader() {
 
 function hideLoader() {
     document.querySelector('.loader').classList.add('loader-hidden')
+}
+
+async function getPersonInfo(personId) {
+
 }
