@@ -219,10 +219,13 @@ img {
     justify-content: center;
 }
 
-.node {
-    fill: #F0CC0D;
+.node, .person-node {
     stroke: #222222;
     stroke-width: 2px;
+}
+
+.node {
+    fill: #F0CC0D;
 }
 
 .person-node {
