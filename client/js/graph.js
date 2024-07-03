@@ -158,7 +158,8 @@ function drawGraph(data, personId) {
         .text(d => d.name);
 
     const personNode = d3.selectAll('.node').filter((d) => {
-        return d.id == personId
+        console.log(typeof d.id)
+        return d.id === parseInt(personId)
     })
     personNode.classed('person-node', true)
 
@@ -203,7 +204,7 @@ function hideLoader() {
 async function getPersonInfo(personId) {
     try {
         const response = await fetch(BASE_URL + '/get_person', {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -222,6 +223,7 @@ async function getPersonInfo(personId) {
         alert('Произошла ошибка: ' + error)
     }
 
+    // TODO: тест инфо о человеке
     /*fetch('http://localhost:8080/js/test-person-data.json')
         .then(response => response.json())
         .then(data => {
