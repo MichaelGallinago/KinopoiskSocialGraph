@@ -85,7 +85,7 @@ async function loadGraph(personId) {
 
         if (response.ok) {
             const data = await response.json()
-            drawGraph(data)
+            drawGraph(data, personId)
             hideLoader()
         } else {
             hideLoader()
@@ -158,7 +158,6 @@ function drawGraph(data, personId) {
         .text(d => d.name);
 
     const personNode = d3.selectAll('.node').filter((d) => {
-        console.log(typeof d.id)
         return d.id === parseInt(personId)
     })
     personNode.attr('class', 'person-node')
@@ -243,7 +242,8 @@ function fillPersonInfo(data) {
     $('.info-elements').empty()
 
     personPhoto.attr('src', data.posterUrl)
-    personName.text(`${data.nameRu} - ${data.nameEn}`)
+    let temp = [data.nameRu, data.nameEn].filter((d) => d != null && d != 'None')
+    personName.text(temp.join(' - '))
 
     personInfoMain.find('.info-elements').append(
         createInfo('Возраст', data.age),
@@ -256,20 +256,27 @@ function fillPersonInfo(data) {
     personInfoMore.find('.info-elements').append(
         createInfo('ID', data.personId),
         createInfo('Профессия', data.profession),
-        createInfo('Дата рождения', data.birthday),
+        createInfo('Дата рождения', formatDate(data.birthday)),
         createInfo('Рост (см)', data.growth),
         createInfo('Супруги', data.spouses),
-        createInfo('Умер', data.death == 'None' ? 'Нет' : data.death),
-        createInfo('Место смерти', data.deathplace == 'None' ? 'Нет' : data.deathplace),
+        createInfo('Умер', data.death == null || data.death == 'None' ? 'SKIP' : formatDate(data.death)),
+        createInfo('Место смерти', data.deathplace == null || data.deathplace == 'None' ? 'SKIP' : data.deathplace),
         createInfo('Ссылка', `<a href="${data.webUrl}" target="_blank">${data.webUrl}</a>`)
     )
 
     function createInfo(key, value) {
-        return $(`
-            <div class="info">
-                <span class="key">${key}</span>
-                <span class="info-value">${value}</span>
-            </div>
-        `)
+        if (value !== 'SKIP') {
+            return $(`
+                <div class="info">
+                    <span class="key">${key}</span>
+                    <span class="info-value">${value}</span>
+                </div>
+            `)
+        }
     }
+}
+
+function formatDate(dateString) {
+    const parts = dateString.split('-');
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
