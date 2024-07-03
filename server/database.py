@@ -31,9 +31,9 @@ class Database:
         film_to_actors = defaultdict(list)
 
         # Создание узлов и построение графа актёров
-        Database.__add_node(root_person, actor_index, nodes, film_to_actors)
+        self.__add_node(root_person, actor_index, nodes, film_to_actors)
         for doc in cursor:
-            Database.__add_node(doc, actor_index, nodes, film_to_actors)
+            self.__add_node(doc, actor_index, nodes, film_to_actors)
 
         # Построение связей
         edges_dict = defaultdict(lambda: defaultdict(set))
@@ -88,16 +88,21 @@ class Database:
         edges = [edge for edge in edges if edge["source"] in connected_nodes and edge["target"] in connected_nodes]
         return {"nodes": nodes, "edges": edges}
 
-    @staticmethod
-    def __add_node(doc, actor_index, nodes, film_to_actors):
+    def __add_node(self, doc, actor_index, nodes, film_to_actors):
         person_id = doc["personId"]
         name = doc["nameRu"] if doc["nameRu"] else doc["nameEn"]
         if person_id not in actor_index:
             nodes.append({"id": person_id, "name": name})
             actor_index[person_id] = name
 
-            for film in doc["films"]:
-                film_id = film["filmId"]
+            film_ids = [film["filmId"] for film in doc["films"]]
+            cursor = self.__films.find({
+                "kinopoiskId": {"$in": film_ids},
+                "type": "FILM"
+            })
+
+            for film in cursor:
+                film_id = film["kinopoiskId"]
                 film_name = film["nameRu"] if film["nameRu"] else film["nameEn"]
                 film_to_actors[film_id].append((person_id, film_name))
 
@@ -228,10 +233,12 @@ class Database:
             return document
 
         self.__pool.update()
-        status, staff = self.__pool.get_staff(film_id)
-        if status == 200 and staff is not None:
+        status1, staff = self.__pool.get_staff(film_id)
+        status2, film = self.__pool.get_film(film_id)
+        if status1 == 200 and status2 == 200 and staff is not None and film is not None:
             document = {"filmId": film_id, "staff": staff}
             self.__staff.insert_one(document)
+            self.__films.insert_one(film)
             return document
         # TODO: exception
 
@@ -348,3 +355,8 @@ class Database:
                 print(error_code + 'Фильм не найден')
             case _:
                 print(error_code + 'Неизвестная ошибка')
+
+    def update_films_by_staff(self):
+        cursor = self.__staff.find()
+        ids = [staff['kinopoiskId'] for staff in cursor]
+        self.get_films(ids)
