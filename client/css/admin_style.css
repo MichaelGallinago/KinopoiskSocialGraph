@@ -93,14 +93,6 @@
   color: #F4F4F4;
 }
 
-/*.admin-stat {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 30px;
-}*/
-
 .admin-stat {
   display: flex;
   flex-direction: column;
