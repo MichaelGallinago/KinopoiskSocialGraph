@@ -1,4 +1,4 @@
-document.getElementById('change-tokens-form').addEventListener('submit', function(event) {
+/*document.getElementById('change-tokens-form').addEventListener('submit', function(event) {
   event.preventDefault();
 
   const username = document.getElementById('username-input').value;
@@ -74,6 +74,9 @@ function getStats() {
 }
 
 getStats();
+
+*/
+
 
 // это пример, надо поменять на реальные данные
 const newUsersData = {

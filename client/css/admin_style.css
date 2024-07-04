@@ -1,18 +1,27 @@
 .admin-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100vh;
   padding: 0 80px;
+  box-sizing: border-box;
+}
+
+.admin-title {
+  font-size: 72px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .admin-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 50%;
-  height: 100%;
+  width: 100%;
   box-sizing: border-box;
-  padding: 80px;
+  padding: 50px;
 }
 
 .admin-section:first-child {
@@ -22,16 +31,11 @@
 }
 
 .admin-section:last-child {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   background-color: #F4F4F4;
   color: #333;
-}
-
-.admin-title {
-  font-size: 72px;
-  font-weight: bold;
-  text-align: center;
-  width: 100%;
-  margin-top: 30px;
 }
 
 .admin-form {
@@ -59,7 +63,7 @@
   padding: 20px 30px;
   border: 2px solid transparent;
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.5); /* Новый цвет фона */
+  background-color: rgba(255, 255, 255, 0.5);
   color: #E48E3F;
   font-size: 28px;
   transition: all 0.1s ease;
@@ -93,22 +97,23 @@
   color: #F4F4F4;
 }
 
-/*.admin-stat {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 30px;
-}*/
-
 .admin-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 30px;
   margin-bottom: 30px;
+  width: 50%;
+}
+
+.admin-stat:last-child {
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+.admin-stat canvas {
   width: 100%;
-  height: 300px; 
+  height: 300px;
 }
 
 .admin-stat-title {
@@ -130,7 +135,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  background-color: #F4F4F4;
+  background-color: #FFDEAD;
   font-family: Roboto, sans-serif;
 }
 
