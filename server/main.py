@@ -43,7 +43,9 @@ def register():
     mongo.db.users.insert_one({
         "login": login,
         "email": email,
-        "password": hashed_password
+        "password": hashed_password,
+        "tokens": 10,
+        "isAdmin": False
     })
 
     return jsonify({"message": "User registered successfully"}), 201

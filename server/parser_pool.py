@@ -1,6 +1,5 @@
 ﻿import threading
 import time
-import asyncio
 
 from parser import Parser
 
