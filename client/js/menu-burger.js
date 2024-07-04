@@ -1,3 +1,5 @@
+const BASE_URL = "http://127.0.0.1:5000"
+
 $(document).ready(() => {
     $('.burger').on('click', showMenu)
 
@@ -18,8 +20,11 @@ function openFavourites() {
 }
 
 function openHistory() {
-    console.log('История')
-    // TODO: история
+    const window = document.createElement('div')
+    window.classList.add('modal')
+    window.insertAdjacentHTML('afterbegin', `
+        
+    `)
 }
 
 async function openAdminPanel() {
@@ -27,7 +32,8 @@ async function openAdminPanel() {
 }
 
 function exit() {
-    localStorage.clear()
+    localStorage.removeItem('login')
+    localStorage.removeItem('password')
     window.location.href = 'index.html'
 }
 

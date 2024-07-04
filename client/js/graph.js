@@ -1,4 +1,4 @@
-
+const BASE_URL = "http://127.0.0.1:5000"
 
 document.getElementById('graph-form').addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -96,9 +96,19 @@ async function loadGraph(personId) {
         hideLoader()
         alert('Произошла ошибка: ' + error)
     }
+
+    /*fetch('http://localhost:8080/js/data/test-graph-1.json')
+        .then(response => response.json())
+        .then(data => {
+            drawGraph(data, personId)
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function drawGraph(data, personId) {
+
+    //saveSearchToHistory(data)
+
     const svg = d3.select("svg")
     let width = +svg.attr("width")
     let height = +svg.attr("height")
@@ -214,6 +224,14 @@ async function getPersonInfo(personId) {
     } catch (error) {
         alert('Произошла ошибка: ' + error)
     }
+
+    /*fetch('http://localhost:8080/js/data/test-person-1.json')
+        .then(response => response.json())
+        .then(data => {
+            clearPersonInfo()
+            fillPersonInfo(data)
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function fillPersonInfo(data) {
@@ -297,4 +315,34 @@ function fillTokens(data) {
         $('.load-graph-btn').attr('disabled', 'disabled')
         alert('У вас закончились токены для загрузки графа!')
     }
+}
+
+function saveSearchToHistory(data) {
+    console.log(localStorage.getItem('searchHistory'))
+
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || []
+
+    searchHistory.push({
+        personId: $('.person-id-input').val(),
+        filter: {
+            depth: $('.depth-input').val(),
+            peopleLimit: $('.people-limit-input').val(),
+            movieLimitForPerson: $('.movie-limit-for-person-input').val(),
+            movieMinForEdge: $('.movie-min-for-edge-input').val(),
+            ageLeft: $('.age-input-left-range').val(),
+            ageRight: $('.age-input-right-range').val(),
+            isAlive: $('.is-alive-input').val(),
+            heightLeft: $('.height-input-left-range').val(),
+            heightRight: $('.height-input-right-range').val(),
+            awards: $('.awards-input').val(),
+            career: $('.career-input').val(),
+            gender: $('.gender-input').val(),
+            countOfMovies: $('.movies-input').val()
+        },
+        edges: data.edges,
+        nodes: data.nodes,
+        date: new Date()
+    })
+
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory))
 }
