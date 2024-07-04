@@ -128,22 +128,6 @@ img {
     color: #F4F4F4;
 }
 
-.exit-btn, .admin-btn {
-    background-color: transparent;
-    width: 35px;
-    height: 35px;
-    border: none;
-    cursor: pointer;
-}
-
-.exit-btn {
-    background-image: url("../img/exit-icon.png");
-}
-
-.admin-btn {
-    background-image: url("../img/admin-icon.png");
-}
-
 .content {
     display: flex;
     width: 100%;

@@ -6,6 +6,7 @@
     <title>КиноГраф</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/graph.css">
+    <link rel="stylesheet" type="text/css" href="css/menu-burger.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
@@ -23,8 +24,15 @@
                 <span class="tokens-text">Токены:</span>
                 <span class="tokens-value"></span>
             </div>
-            <button class="exit-btn"></button>
-            <button class="admin-btn"></button>
+            <div class="burger">
+                <span></span>
+            </div>
+            <ul class="sidebar">
+                <li><button class="favourites-btn">Избранное</button></li>
+                <li><button class="history-btn">История</button></li>
+                <li><button class="admin-btn">Администрирование</button></li>
+                <li><button class="exit-btn">Выход</button></li>
+            </ul>
         </div>
     </header>
     <div class="content">
@@ -187,5 +195,6 @@
         </div>
     </div>
     <script src="js/graph.js"></script>
+    <script src="js/menu-burger.js"></script>
 </body>
 </html>
