@@ -143,12 +143,11 @@ def get_db_statistic():
 @app.route('/get_logins_statistic', methods=['POST'])
 def get_logins_statistic():
     data = request.json
-
     if not data or not all(k in data for k in ("start_time", "interval_length")):
         return jsonify({"error": "Invalid input"}), 400
 
     start_time = datetime.datetime.fromisoformat(data["start_time"])
-    interval = timedelta(seconds=data["interval_length"])
+    interval = timedelta(hours=float(data["interval_length"]))
 
     return db.count_logins(start_time, interval), 200
 
