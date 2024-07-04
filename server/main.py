@@ -103,6 +103,19 @@ def get_person():
     return jsonify(file), 200
 
 
+@app.route('/set_tokens', methods=['POST'])
+def set_tokens():
+    data = request.json
+
+    if not data or not all(k in data for k in ("login", "password", "value", "target_login")):
+        return jsonify({"error": "Invalid input"}), 400
+
+    if check_password_hash(db.get_user(data["login"])["password"], data["password"]):
+        db.set_token(data["target_login"], int(data["value"]))
+
+    return jsonify({"error": "Admin passwords do not match"}), 400
+
+
 def generate_graph_stream(graph):
     yield '{"nodes":['
     first_item = True

@@ -396,3 +396,8 @@ class Database:
             {"login": login},
             {"$inc": {"tokens": -1}})
         return result.modified_count > 0
+
+    def set_token(self, login, value):
+        self.__users.update_one(
+            {"login": login},
+            {"set": {"tokens": value}})
