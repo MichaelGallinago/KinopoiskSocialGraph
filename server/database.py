@@ -1,3 +1,4 @@
+import datetime
 import threading
 import time
 from collections import defaultdict, deque
@@ -347,6 +348,9 @@ class Database:
             self.__users.create_index('login', unique=True)
             self.__users.create_index('email', unique=True)
 
+        self.__registrations = self.__db['registrations']
+        self.__logins = self.__db['logins']
+
     @staticmethod
     def _check_status(status_code, index):
         error_code = f'Error on id={index}: {status_code}: '
@@ -386,7 +390,13 @@ class Database:
             "isAdmin": False
         })
 
+        self.__registrations.insert_one({"login": login, "time": datetime.datetime.now()})
+        self.login_user(login)
+
         return jsonify({"message": "User registered successfully"}), 201
+
+    def login_user(self, login):
+        self.__logins.insert_one({"login": login, "time": datetime.datetime.now()})
 
     def decrement_token(self, login):
         if self.get_user(login)['tokens'] <= 0:
@@ -401,3 +411,40 @@ class Database:
         self.__users.update_one(
             {"login": login},
             {"set": {"tokens": value}})
+
+    def get_statistics(self):
+        return {
+            "films": self.__films.count_documents({}),
+            "persons": self.__persons.count_documents({}),
+            "staff": self.__staff.count_documents({}),
+            "users": self.__users.count_documents({}),
+            "registrations": self.__registrations.count_documents({}),
+            "logins": self.__logins.count_documents({})
+        }
+
+    def count_logins(self, start_time, interval_length):
+        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__logins)}, 200
+
+    def count_registrations(self, start_time, interval_length):
+        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__registrations)}, 200
+
+    @staticmethod
+    def __count_in_intervals(start_time, interval_length, collection):
+        end_time = datetime.datetime.now()
+        counts = []
+
+        current_start = start_time
+        while current_start < end_time:
+            current_end = current_start + interval_length
+            count = collection.count_documents({
+                "time": {
+                    "$gte": current_start,
+                    "$lt": current_end
+                }
+            })
+
+            counts.append(count)
+            current_start = current_end
+
+        return counts
+

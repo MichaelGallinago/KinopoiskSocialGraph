@@ -1,17 +1,17 @@
-﻿import socket
+﻿import datetime
+from datetime import timedelta
 
 from database import Database
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from flask_pymongo import PyMongo
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from email_validator import validate_email, EmailNotValidError
 import json
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
-mongo = PyMongo(app)
-db = Database(mongo.db)
+db = Database(PyMongo(app).db)
 CORS(app)
 
 REQUIRED_KEYS = ['login', 'personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft',
@@ -55,6 +55,7 @@ def login():
     if not user or not check_password_hash(user['password'], password):
         return jsonify({"error": "Invalid login or password"}), 400
 
+    db.login_user(login)
     return jsonify({"message": "Login successful"}), 200
 
 
@@ -114,6 +115,37 @@ def set_tokens():
         db.set_token(data["target_login"], int(data["value"]))
 
     return jsonify({"error": "Admin passwords do not match"}), 400
+
+
+@app.route('/get_db_statistic', methods=['GET'])
+def get_db_statistic():
+    return db.get_statistics(), 200
+
+
+@app.route('/get_logins_statistic', methods=['POST'])
+def get_logins_statistic():
+    data = request.json
+
+    if not data or not all(k in data for k in ("start_time", "interval_length")):
+        return jsonify({"error": "Invalid input"}), 400
+
+    start_time = datetime.datetime.fromisoformat(data["start_time"])
+    interval = timedelta(seconds=data["interval_length"])
+
+    return db.count_logins(start_time, interval), 200
+
+
+@app.route('/get_registrations_statistic', methods=['POST'])
+def get_registrations_statistic():
+    data = request.json
+
+    if not data or not all(k in data for k in ("start_time", "interval_length")):
+        return jsonify({"error": "Invalid input"}), 400
+
+    start_time = datetime.datetime.fromisoformat(data["start_time"])
+    interval = timedelta(seconds=data["interval_length"])
+
+    return db.count_registrations(start_time, interval), 200
 
 
 def generate_graph_stream(graph):
