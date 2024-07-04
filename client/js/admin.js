@@ -128,7 +128,7 @@ const visitsChart = new Chart(visitsCtx, {
 });
 */
 
-//////////
+//getRegistrationsStatistic
 function getRegistrationsStatistic() {
   const data = {
     start_time: '2024-07-01', // начальная дата для статистики
@@ -149,7 +149,7 @@ function getRegistrationsStatistic() {
     }
   })
   .then(data => {
-    const newUsersData = {
+      const newUsersData = {
       labels: data.labels,
       datasets: [{
         label: 'Новых пользователей',
@@ -179,3 +179,30 @@ function getRegistrationsStatistic() {
 }
 
 getRegistrationsStatistic();
+
+//пример
+/*
+const newUsersData = {
+  labels: ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05", "2024-02-06", "2024-02-07"],
+  datasets: [{
+    label: 'Новых пользователей',
+    data: [12, 19, 3, 5, 2, 3, 7],
+    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+    borderColor: 'rgba(75, 192, 192, 1)',
+    borderWidth: 1
+  }]
+};
+
+const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
+const newUsersChart = new Chart(newUsersCtx, {
+  type: 'bar',
+  data: newUsersData,
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+*/
