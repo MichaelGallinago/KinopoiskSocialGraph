@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5000"
+
 
 document.getElementById('graph-form').addEventListener('submit', async function (event) {
     event.preventDefault()
@@ -10,15 +10,6 @@ document.getElementById('graph-form').addEventListener('submit', async function 
 
 $(document).ready(function () {
     getTokens()
-})
-
-$('.exit-btn').on('click', function () {
-    localStorage.clear()
-    window.location.href = 'index.html'
-})
-
-$('.admin-btn').on('click', async function () {
-    await checkAccessToAdminPanel()
 })
 
 $('.depth-input').on('input', function() {
@@ -275,34 +266,6 @@ function clearPersonInfo() {
     $('.person-photo').attr('src', '')
     $('.person-name').text('')
     $('.info-elements').empty()
-}
-
-async function checkAccessToAdminPanel() {
-    try {
-        const response = await fetch(BASE_URL + '/get_admin_status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                login: localStorage.getItem('login'),
-                password: localStorage.getItem('password')
-            })
-        })
-
-        if (response.ok) {
-            const data = await response.json()
-            if (data.status) {
-                window.location.href = 'admin_win.html'
-            } else {
-                alert('Вы не являетесь администратором!')
-            }
-        } else {
-            alert(': ' + response.status)
-        }
-    } catch (error) {
-        alert('Произошла ошибка: ' + error)
-    }
 }
 
 async function getTokens() {

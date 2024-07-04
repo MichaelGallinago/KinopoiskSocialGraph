@@ -42,6 +42,7 @@ async function register(login, email, password) {
         if (response.ok) {
             alert('Регистрация прошла успешно!')
             localStorage.setItem('login', login)
+            localStorage.setItem('password', password)
             window.location.href = 'graph.html'
         } else {
             alert('Ошибка регистрации: ' + response.status)
