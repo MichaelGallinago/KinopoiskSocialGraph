@@ -285,7 +285,8 @@ async function checkAccessToAdminPanel() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                login: localStorage.getItem('login')
+                login: localStorage.getItem('login'),
+                password: localStorage.getItem('password')
             })
         })
 
