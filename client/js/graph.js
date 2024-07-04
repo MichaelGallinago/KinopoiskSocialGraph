@@ -1,18 +1,24 @@
 const BASE_URL = "http://127.0.0.1:5000"
 
-$('.login').text(localStorage.getItem('login'))
-
 document.getElementById('graph-form').addEventListener('submit', async function (event) {
     event.preventDefault()
 
     const personId = document.getElementById('person-id').value
-
+    
     await loadGraph(personId)
+})
+
+$(document).ready(function () {
+    getTokens()
 })
 
 $('.exit-btn').on('click', function () {
     localStorage.clear()
     window.location.href = 'index.html'
+})
+
+$('.admin-btn').on('click', async function () {
+    await checkAccessToAdminPanel()
 })
 
 $('.depth-input').on('input', function() {
@@ -66,6 +72,8 @@ async function loadGraph(personId) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                login: localStorage.getItem('login'),
+                password: localStorage.getItem('password'),
                 personId: personId,
                 depth: $('.depth-input').val(),
                 peopleLimit: $('.people-limit-input').val(),
@@ -85,7 +93,9 @@ async function loadGraph(personId) {
 
         if (response.ok) {
             const data = await response.json()
+            clearPersonInfo()
             drawGraph(data, personId)
+            getTokens()
             hideLoader()
         } else {
             hideLoader()
@@ -95,15 +105,6 @@ async function loadGraph(personId) {
         hideLoader()
         alert('Произошла ошибка: ' + error)
     }
-
-    // TODO: тест графа
-    /*fetch('http://localhost:8080/js/test-data-1.json')
-        .then(response => response.json())
-        .then(data => {
-            drawGraph(data, personId);
-            hideLoader()
-        })
-        .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function drawGraph(data, personId) {
@@ -214,6 +215,7 @@ async function getPersonInfo(personId) {
 
         if (response.ok) {
             const data = await response.json()
+            clearPersonInfo()
             fillPersonInfo(data)
         } else {
             alert('Ошибка при загрузке данных о персоне: ' + response.status)
@@ -221,14 +223,6 @@ async function getPersonInfo(personId) {
     } catch (error) {
         alert('Произошла ошибка: ' + error)
     }
-
-    // TODO: тест инфо о человеке
-    /*fetch('http://localhost:8080/js/test-person-data.json')
-        .then(response => response.json())
-        .then(data => {
-            fillPersonInfo(data);
-        })
-        .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function fillPersonInfo(data) {
@@ -237,12 +231,8 @@ function fillPersonInfo(data) {
     const personInfoMain = $('.person-info-main')
     const personInfoMore = $('.person-info-more')
 
-    personPhoto.attr('src', '')
-    personName.text('')
-    $('.info-elements').empty()
-
     personPhoto.attr('src', data.posterUrl)
-    let temp = [data.nameRu, data.nameEn].filter((d) => d != null && d != 'None')
+    let temp = [data.nameRu, data.nameEn].filter((d) => d != null && d != 'None' && d != '')
     personName.text(temp.join(' - '))
 
     personInfoMain.find('.info-elements').append(
@@ -279,4 +269,67 @@ function fillPersonInfo(data) {
 function formatDate(dateString) {
     const parts = dateString.split('-');
     return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+function clearPersonInfo() {
+    $('.person-photo').attr('src', '')
+    $('.person-name').text('')
+    $('.info-elements').empty()
+}
+
+async function checkAccessToAdminPanel() {
+    try {
+        const response = await fetch(BASE_URL + '/get_admin_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: localStorage.getItem('login')
+            })
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+            if (data.status) {
+                window.location.href = 'admin_win.html'
+            } else {
+                alert('Вы не являетесь администратором!')
+            }
+        } else {
+            alert(': ' + response.status)
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
+    }
+}
+
+async function getTokens() {
+    try {
+        const response = await fetch(BASE_URL + '/get_tokens', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: localStorage.getItem('login')
+            })
+        })
+
+        if (response.ok) {
+            fillTokens(data)
+        } else {
+            alert('Ошибка при загрузке данных о персоне: ' + response.status)
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
+    }
+}
+
+function fillTokens(data) {
+    $('.tokens-value').text(data.tokens)
+    if (data.tokens == 0) {
+        $('.load-graph-btn').attr('disabled', 'disabled')
+        alert('У вас закончились токены для загрузки графа!')
+    }
 }
