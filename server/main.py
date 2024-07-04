@@ -116,6 +116,21 @@ def set_tokens():
 
     if check_password_hash(db.get_user(data["login"])["password"], data["password"]):
         db.set_token(data["target_login"], int(data["value"]))
+        return jsonify({"message": "Tokens are set successful"}), 200
+
+    return jsonify({"error": "Admin passwords do not match"}), 400
+
+
+@app.route('/get_admin_status', methods=['POST'])
+def get_admin_status():
+    data = request.json
+
+    if not data or not all(k in data for k in ("login", "password")):
+        return jsonify({"error": "Invalid input"}), 400
+
+    user = db.get_user(data["login"])
+    if check_password_hash(user["password"], data["password"]):
+        return jsonify({"status": user["isAdmin"]}), 200
 
     return jsonify({"error": "Admin passwords do not match"}), 400
 
