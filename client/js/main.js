@@ -67,6 +67,7 @@ async function auth(login, password) {
         if (response.ok) {
             const data = await response.json()
             localStorage.setItem('login', login)
+            localStorage.setItem('password', password)
             window.location.href = 'graph.html'
         } else {
             alert('Ошибка авторизации: ' + response.status)

@@ -105,26 +105,43 @@ img {
     box-shadow: none;
     color: #F0CC0D;
 }
+.load-graph-btn:disabled {
+    background-color: #A5A5A5;
+    box-shadow: none;
+    border-color: transparent;
+    cursor: default;
+}
+.load-graph-btn:disabled:hover {
+    color: #222;
+}
 
 .right-nav-content {
+    right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 25px;
 }
 
-.login {
-    font-size: 24px;
+.tokens-container span {
+    font-size: 20px;
     color: #F4F4F4;
 }
 
-.exit-btn {
+.exit-btn, .admin-btn {
     background-color: transparent;
-    background-image: url("../img/exit-icon.png");
     width: 35px;
     height: 35px;
     border: none;
     cursor: pointer;
+}
+
+.exit-btn {
+    background-image: url("../img/exit-icon.png");
+}
+
+.admin-btn {
+    background-image: url("../img/admin-icon.png");
 }
 
 .content {
@@ -138,15 +155,13 @@ img {
     top: 0;
     bottom: 0;
     margin-top: 80px;
-    min-width: 450px;
-    width: auto;
-    max-width: 600px;
     overflow-y: auto;
     background: #E8E8E8;
 }
 
 .person-info-container {
     left: 0;
+    width: 550px;
     border-right: 2px solid #222222;
 }
 
@@ -240,6 +255,7 @@ img {
 
 .filters-container {
     right: 0;
+    width: 450px;
     border-left: 2px solid #222222;
     padding: 40px;
     display: flex;
