@@ -77,9 +77,8 @@ getStats();
 
 */
 
-
 // это пример, надо поменять на реальные данные
-const newUsersData = {
+/*const newUsersData = {
   labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
   datasets: [{
     label: 'Новых пользователей',
@@ -127,4 +126,56 @@ const visitsChart = new Chart(visitsCtx, {
     }
   }
 });
+*/
 
+//////////
+function getRegistrationsStatistic() {
+  const data = {
+    start_time: '2024-07-01', // начальная дата для статистики
+    interval_length: 3 // длительность интервала в днях
+  };
+  fetch('/get_registrations_statistic', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error('Failed to get registrations statistic.');
+    }
+  })
+  .then(data => {
+    const newUsersData = {
+      labels: data.labels,
+      datasets: [{
+        label: 'Новых пользователей',
+        data: data.data,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }]
+    };
+
+    const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
+    const newUsersChart = new Chart(newUsersCtx, {
+      type: 'bar',
+      data: newUsersData,
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  })
+  .catch(error => {
+    console.error(error);
+  });
+}
+
+getRegistrationsStatistic();
