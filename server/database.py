@@ -2,6 +2,9 @@ import threading
 import time
 from collections import defaultdict, deque
 
+from flask import jsonify
+from werkzeug.security import generate_password_hash
+
 from parser_pool import ParserPool
 
 is_limit_reached = False
@@ -338,6 +341,12 @@ class Database:
         if not progress_exists:
             self.__progress.insert_many([{'films_id': 298}, {'staff_id': 298}])
 
+        users_exists = 'users' in collection_names
+        self.__users = self.__db['users']
+        if not users_exists:
+            self.__users.create_index('login', unique=True)
+            self.__users.create_index('email', unique=True)
+
     @staticmethod
     def _check_status(status_code, index):
         error_code = f'Error on id={index}: {status_code}: '
@@ -360,3 +369,30 @@ class Database:
         cursor = self.__staff.find()
         ids = [staff['kinopoiskId'] for staff in cursor]
         self.get_films(ids)
+
+    def get_user(self, login):
+        return self.__users.find_one({"login": login})
+
+    def register_user(self, login, email, password):
+        if self.__users.find_one({"login": login}) or self.__users.users.find_one({"email": email}):
+            return jsonify({"error": "Login or email already exists"}), 400
+
+        hashed_password = generate_password_hash(password)
+        self.__users.insert_one({
+            "login": login,
+            "email": email,
+            "password": hashed_password,
+            "tokens": 10,
+            "isAdmin": False
+        })
+
+        return jsonify({"message": "User registered successfully"}), 201
+
+    def decrement_token(self, login):
+        if self.get_user(login)['tokens'] <= 0:
+            return False
+
+        result = self.__users.update_one(
+            {"login": login},
+            {"$inc": {"tokens": -1}})
+        return result.modified_count > 0

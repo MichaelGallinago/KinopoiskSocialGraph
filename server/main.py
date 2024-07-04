@@ -14,8 +14,8 @@ mongo = PyMongo(app)
 db = Database(mongo.db)
 CORS(app)
 
-REQUIRED_KEYS = ['personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft', 'ageRight',
-                 'isAlive', 'heightLeft', 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
+REQUIRED_KEYS = ['login', 'personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft',
+                 'ageRight', 'isAlive', 'heightLeft', 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
 
 
 @app.route('/register', methods=['POST'])
@@ -36,19 +36,7 @@ def register():
     except EmailNotValidError:
         return jsonify({"error": "Invalid email"}), 400
 
-    if mongo.db.users.find_one({"username": login}) or mongo.db.users.find_one({"email": email}):
-        return jsonify({"error": "Username or email already exists"}), 400
-
-    hashed_password = generate_password_hash(password)
-    mongo.db.users.insert_one({
-        "login": login,
-        "email": email,
-        "password": hashed_password,
-        "tokens": 10,
-        "isAdmin": False
-    })
-
-    return jsonify({"message": "User registered successfully"}), 201
+    return db.register_user(login, email, password)
 
 
 @app.route('/login', methods=['POST'])
@@ -57,17 +45,32 @@ def login():
     if not data or not all(k in data for k in ("login", "password")):
         return jsonify({"error": "Invalid input"}), 400
 
-    username = data['login']
+    login = data['login']
     password = data['password']
 
-    if not username or not password:
+    if not login or not password:
         return jsonify({"error": "Fields cannot be empty"}), 400
 
-    user = mongo.db.users.find_one({"login": username})
+    user = db.get_user(login)
     if not user or not check_password_hash(user['password'], password):
         return jsonify({"error": "Invalid login or password"}), 400
 
     return jsonify({"message": "Login successful"}), 200
+
+
+@app.route('/get_tokens', methods=['POST'])
+def get_tokens():
+    data = request.json
+
+    if not data or not all(k in data for k in ("login",)):
+        return jsonify({"error": "Invalid input"}), 400
+
+    login = data["tokens"]
+    if not login:
+        return jsonify({"error": "Login cannot be empty"}), 400
+
+    user = db.get_user(login)
+    jsonify({"tokens": user["tokens"]}), 200
 
 
 @app.route('/make_graph', methods=['POST'])
@@ -78,7 +81,10 @@ def make_graph():
         return jsonify({"error": "Invalid input"}), 400
 
     graph = db.get_person_graph(data)
-    return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
+    if db.decrement_token(data["login"]):
+        return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
+
+    return jsonify({"error": "Not enough tokens"}), 400
 
 
 @app.route('/get_person', methods=['POST'])
