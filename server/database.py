@@ -423,10 +423,10 @@ class Database:
         }
 
     def count_logins(self, start_time, interval_length):
-        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__logins)}, 200
+        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__logins)}
 
     def count_registrations(self, start_time, interval_length):
-        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__registrations)}, 200
+        return {'counts': Database.__count_in_intervals(start_time, interval_length, self.__registrations)}
 
     @staticmethod
     def __count_in_intervals(start_time, interval_length, collection):
