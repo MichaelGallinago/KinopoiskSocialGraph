@@ -68,12 +68,12 @@ def get_tokens():
     if not data or not all(k in data for k in ("login",)):
         return jsonify({"error": "Invalid input"}), 400
 
-    login = data["tokens"]
+    login = data["login"]
     if not login:
         return jsonify({"error": "Login cannot be empty"}), 400
 
     user = db.get_user(login)
-    jsonify({"tokens": user["tokens"]}), 200
+    return jsonify({"tokens": user["tokens"]}), 200
 
 
 @app.route('/make_graph', methods=['POST'])
