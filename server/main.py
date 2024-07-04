@@ -14,8 +14,10 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
 db = Database(PyMongo(app).db)
 CORS(app)
 
-REQUIRED_KEYS = ['login', 'personId', 'depth', 'peopleLimit', 'movieLimitForPerson', 'movieMinForEdge', 'ageLeft',
-                 'ageRight', 'isAlive', 'heightLeft', 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
+REQUIRED_KEYS = ['login', 'password',
+                 'personId', 'depth', 'peopleLimit', 'movieLimitForPerson',
+                 'movieMinForEdge', 'ageLeft', 'ageRight', 'isAlive', 'heightLeft',
+                 'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
 
 
 @app.route('/register', methods=['POST'])
@@ -81,11 +83,12 @@ def make_graph():
     if not data or not all(k in data for k in REQUIRED_KEYS):
         return jsonify({"error": "Invalid input"}), 400
 
-    graph = db.get_person_graph(data)
-    if db.decrement_token(data["login"]):
-        return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
-
-    return jsonify({"error": "Not enough tokens"}), 400
+    if check_password_hash(db.get_user(data["login"])["password"], data["password"]):
+        if db.decrement_token(data["login"]):
+            graph = db.get_person_graph(data)
+            return Response(stream_with_context(generate_graph_stream(graph)), mimetype='application/json')
+        return jsonify({"error": "Not enough tokens"}), 400
+    return jsonify({"error": "Invalid login or password"}), 400
 
 
 @app.route('/get_person', methods=['POST'])
