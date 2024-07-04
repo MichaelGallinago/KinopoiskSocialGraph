@@ -21,7 +21,7 @@
   align-items: center;
   width: 100%;
   box-sizing: border-box;
-  padding: 80px;
+  padding: 50px;
 }
 
 .admin-section:first-child {
@@ -103,8 +103,17 @@
   align-items: center;
   gap: 30px;
   margin-bottom: 30px;
-  width: 45%;
-  height: 100%;
+  width: 50%;
+}
+
+.admin-stat:last-child {
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+.admin-stat canvas {
+  width: 100%;
+  height: 300px;
 }
 
 .admin-stat-title {
