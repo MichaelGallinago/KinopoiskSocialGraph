@@ -286,3 +286,25 @@ const loginsChart = new Chart(loginsCtx, {
   }
 });
 */
+
+function getDbStatistic() {
+  fetch('/get_db_statistic')
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('Failed to get database statistic.');
+      }
+    })
+    .then(data => {
+      document.getElementById('db-size-stat').textContent =
+        `Фильмы: ${data.films}, Персоны: ${data.persons}, ` +
+        `Сотрудники: ${data.staff}, Пользователи: ${data.users}, ` +
+        `Регистрации: ${data.registrations}, Входы: ${data.logins}`;
+    })
+    .catch(error => {
+      console.error(error);
+    });
+}
+
+getDbStatistic();
