@@ -1,0 +1,152 @@
+.admin-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  padding: 0 80px;
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 80px;
+}
+
+.admin-section:first-child {
+  background: linear-gradient(135deg, rgba(228, 202, 63, 1.0) 0%, rgba(228, 142, 63, 1.0) 100%);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+  color: #F4F4F4;
+}
+
+.admin-section:last-child {
+  background-color: #F4F4F4;
+  color: #333;
+}
+
+.admin-title {
+  font-size: 72px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-label {
+  font-size: 24px;
+  font-weight: bold;
+  color: #E48E3F;
+}
+
+.admin-input {
+  padding: 20px 30px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.5); /* Новый цвет фона */
+  color: #E48E3F;
+  font-size: 28px;
+  transition: all 0.1s ease;
+}
+
+
+.admin-input:focus {
+  border-color: #E48E3F;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(228, 142, 63, 0.2);
+  outline: none;
+}
+
+.admin-button {
+  padding: 18px 56px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
+  color: #F4F4F4;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #E48E3F;
+}
+
+.admin-button:hover {
+  background-color: #cc6600;
+  border-color: #cc6600;
+  box-shadow: 0 0 16px rgba(204, 102, 0, 0.5);
+  color: #F4F4F4;
+}
+
+/*.admin-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}*/
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  width: 100%;
+  height: 300px; 
+}
+
+.admin-stat-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.admin-stat-value {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+::selection {
+  background-color: #726253;
+  color: #F4F4F4;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  background-color: #F4F4F4;
+  font-family: Roboto, sans-serif;
+}
+
+h1, h2, p {
+  margin: 0;
+  padding: 0;
+}
+
+.glowing-button {
+  padding: 18px 56px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
+  color: #F4F4F4;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
