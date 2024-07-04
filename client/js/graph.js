@@ -317,6 +317,7 @@ async function getTokens() {
         })
 
         if (response.ok) {
+            const data = await response.json()
             fillTokens(data)
         } else {
             alert('Ошибка при загрузке данных о персоне: ' + response.status)
