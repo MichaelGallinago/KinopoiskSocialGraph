@@ -182,7 +182,7 @@ getRegistrationsStatistic();
 
 
 //пример
-/*
+
 const newUsersData = {
   labels: ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05", "2024-02-06", "2024-02-07"],
   datasets: [{
@@ -206,7 +206,7 @@ const newUsersChart = new Chart(newUsersCtx, {
     }
   }
 });
-*/
+
 
 //getLoginsStatistic
 function getLoginsStatistic() {
@@ -261,7 +261,7 @@ function getLoginsStatistic() {
 getLoginsStatistic();
 
 //пример
-/*
+
 const loginsData = {
   labels: ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05", "2024-02-06", "2024-02-07"],
   datasets: [{
@@ -285,7 +285,7 @@ const loginsChart = new Chart(loginsCtx, {
     }
   }
 });
-*/
+
 
 function getDbStatistic() {
   fetch('/get_db_statistic')
