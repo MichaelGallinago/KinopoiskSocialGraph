@@ -1,5 +1,3 @@
-const BASE_URL = "http://127.0.0.1:5000"
-
 $(document).ready(() => {
     $('.burger').on('click', showMenu)
 
@@ -7,10 +5,13 @@ $(document).ready(() => {
     $('.history-btn').on('click', openHistory)
     $('.admin-btn').on('click', openAdminPanel)
     $('.exit-btn').on('click', exit)
+
+    $('.close-history-btn').on('click', closeHistory)
 })
 
 function showMenu() {
     this.classList.toggle('active')
+    console.log('test')
     $('.sidebar').toggleClass('open')
 }
 
@@ -20,11 +21,85 @@ function openFavourites() {
 }
 
 function openHistory() {
-    const window = document.createElement('div')
-    window.classList.add('modal')
-    window.insertAdjacentHTML('afterbegin', `
-        
-    `)
+    const data = JSON.parse(localStorage.getItem('searchHistory'))
+    if (data != null) {
+        data.forEach(d => {
+            $('.history-elements').append(`
+            <div class="history-element">
+                <div class="history-values">
+                    <span class="history-element-name key">ID человека</span>
+                    <span class="history-element-name value">${d.personId}</span>
+                </div>
+                <div class="history-values">
+                    <span class="history-element-date key">Дата запроса</span>
+                    <span class="history-element-date value">${d.date}</span>
+                </div>
+            </div>
+        `)
+        })
+    }
+
+    const historyElement = $('.history-element')
+    $('.history-modal').css('display', 'block')
+    historyElement.on('click', function () {
+        const personIdValue = $(this).find('.history-element-name.value').text()
+        const dateValue = $(this).find('.history-element-date.value').text()
+
+        const currentData = data.filter(d => d.personId == personIdValue && d.date == dateValue)
+
+        $('.person-id-input').val(personIdValue)
+        $('.person-id-label').val(personIdValue)
+
+        $('.depth-input').val(currentData[0].filters.depth)
+        $('#depth-text').val(currentData[0].filters.depth)
+
+        $('.people-limit-input').val(currentData[0].filters.peopleLimit)
+        $('.people-limit-text').val(currentData[0].filters.peopleLimit)
+
+        $('.movie-limit-for-person-input').val(currentData[0].filters.movieLimitForPerson)
+        $('.movie-limit-for-person-text').val(currentData[0].filters.movieLimitForPerson)
+
+        $('.movie-min-for-edge-input').val(currentData[0].filters.movieMinForEdge)
+        $('.movie-min-for-edge-text').val(currentData[0].filters.movieMinForEdge)
+
+        $('.age-input-left-range').val(currentData[0].filters.ageLeft)
+        $('#left-age-text').val(currentData[0].filters.ageLeft)
+
+        $('.age-input-right-range').val(currentData[0].filters.ageRight)
+        $('#right-age-text').val(currentData[0].filters.ageRight)
+
+        $('.is-alive-input').val(currentData[0].filters.isAlive)
+
+        $('.height-input-left-range').val(currentData[0].filters.heightLeft)
+        $('#left-height-text').val(currentData[0].filters.heightLeft)
+
+        $('.height-input-right-range').val(currentData[0].filters.heightRight)
+        $('#right-height-text').val(currentData[0].filters.heightRight)
+
+        $('.awards-input').val(currentData[0].filters.awards)
+        $('#awards-text').val(currentData[0].filters.awards)
+
+        $('.career-input').val(currentData[0].filters.career)
+
+        $('.gender-input').val(currentData[0].filters.gender)
+
+        $('.movies-input').val(currentData[0].filters.countOfMovies)
+        $('#movies-text').val(currentData[0].filters.countOfMovies)
+
+        drawGraph(
+            {
+                edges: currentData[0].edges,
+                nodes: currentData[0].nodes
+            },
+            personIdValue
+        )
+        closeHistory()
+    })
+}
+
+function closeHistory() {
+    $('.history-elements').empty()
+    $('.history-modal').css('display', 'none')
 }
 
 async function openAdminPanel() {

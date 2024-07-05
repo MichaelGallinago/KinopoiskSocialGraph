@@ -1,10 +1,10 @@
+const BASE_URL = "http://127.0.0.1:5000"
+
 const loginModal = $.modal()
 const openLoginWindow = document.getElementById('open-login-window')
 openLoginWindow.addEventListener('click', event => {
     loginModal.open()
 })
-
-const BASE_URL = "http://127.0.0.1:5000"
 
 document.getElementById('register-form').addEventListener('submit', async function (event) {
     event.preventDefault()
