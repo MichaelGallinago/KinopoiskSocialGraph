@@ -128,6 +128,16 @@ const visitsChart = new Chart(visitsCtx, {
 });
 */
 
+//кнопка выхода
+$(document).ready(() => {
+    $('.admin-logout-button').on('click', logout);
+});
+
+function logout() {
+    localStorage.removeItem('login');
+    localStorage.removeItem('password');
+    window.location.href = 'index.html';
+}
 //getRegistrationsStatistic
 function getRegistrationsStatistic() {
   const data = {
@@ -179,6 +189,7 @@ function getRegistrationsStatistic() {
 }
 
 getRegistrationsStatistic();
+
 
 
 //пример
@@ -260,6 +271,7 @@ function getLoginsStatistic() {
 
 getLoginsStatistic();
 
+
 //пример
 
 const loginsData = {
@@ -286,7 +298,6 @@ const loginsChart = new Chart(loginsCtx, {
   }
 });
 
-
 function getDbStatistic() {
   fetch('/get_db_statistic')
     .then(response => {
@@ -308,3 +319,52 @@ function getDbStatistic() {
 }
 
 getDbStatistic();
+
+const data = {
+  'films': 41252,
+  'persons': 270268,
+  'staff': 37141,
+  'users': 4,
+  'registrations': 3,
+  'logins': 27
+};
+
+
+// пример get_db_statistic
+const ctx = document.getElementById('myChart').getContext('2d');
+const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Фильмы', 'Персоны', 'Сотрудники', 'Пользователи', 'Регистрации', 'Входы'],
+        datasets: [{
+            label: '# Количество',
+            data: [data.films, data.persons, data.staff, data.users, data.registrations, data.logins],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+
