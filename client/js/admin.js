@@ -131,8 +131,8 @@ const visitsChart = new Chart(visitsCtx, {
 //getRegistrationsStatistic
 function getRegistrationsStatistic() {
   const data = {
-    start_time: '2024-07-01', // начальная дата для статистики
-    interval_length: 3 // длительность интервала в днях
+    start_time: '2024-06-29T14:30:45.123Z', // начальная дата для статистики
+    interval_length: 24 // длительность интервала в часах
   };
   fetch('/get_registrations_statistic', {
     method: 'POST',
@@ -211,8 +211,8 @@ const newUsersChart = new Chart(newUsersCtx, {
 //getLoginsStatistic
 function getLoginsStatistic() {
   const data = {
-    start_time: '2024-07-01', // начальная дата для статистики
-    interval_length: 3 // длительность интервала в днях
+    start_time: '2024-06-29T14:30:45.123Z', // начальная дата для статистики
+    interval_length: 30 // длительность интервала в днях
   };
   fetch('/get_logins_statistic', {
     method: 'POST',
