@@ -144,6 +144,8 @@
                         <option>Оператор</option>
                         <option>Переводчик</option>
                         <option>Художник-постановщик</option>
+                        <option>Актер дубляжа</option>
+                        <option>Режиссер дубляжа</option>
                     </select>
                 </div>
             </div>
@@ -162,40 +164,16 @@
                 </div>
                 <input type="range" class="movies-input" min="1" max="1000" value="500">
             </div>
-            <!--<div class="filter">
-                <div class="filter-info">
-                    <span class="key">Знак зодиака</span>
-                    <select name="career" id="zodiac-sign-input" class="zodiac-sign-input">
-                        <option value="aries">Овен</option>
-                        <option value="taurus">Телец</option>
-                        <option value="gemini">Близнецы</option>
-                        <option value="cancer">Рак</option>
-                        <option value="leo">Лев</option>
-                        <option value="virgo">Дева</option>
-                        <option value="libra">Весы</option>
-                        <option value="scorpio">Скорпион</option>
-                        <option value="sagittarius">Стрелец</option>
-                        <option value="capricorn">Козерог</option>
-                        <option value="aquarius">Водолей</option>
-                        <option value="pisces">Рыбы</option>
-                    </select>
-                </div>
-            </div>-->
-            <!--<div class="filter">
-                <div class="filter-info">
-                    <span class="key">Жанр</span>
-                    <select name="genre" id="genre-input" class="genre-input">
-                        <option value="drama">Драма</option>
-                        <option value="comedy">Комедия</option>
-                        <option value="adventures">Приключения</option>
-                        &lt;!&ndash; TODO: добавить больше жанров &ndash;&gt;
-                    </select>
-                </div>
-            </div>-->
         </div>
     </div>
-    <div class="modal">
-
+    <div class="history-modal modal">
+        <!--<div class="modal-overlay close-history-btn" data-close="true">-->
+            <div class="modal-window">
+                <img src="img/close-icon.png" alt="Close" class="close-history-btn">
+                <h2 class="login-title">История запросов</h2>
+                <div class="history-elements"></div>
+            </div>
+        <!--</div>-->
     </div>
     <script src="js/graph.js"></script>
     <script src="js/menu-burger.js"></script>

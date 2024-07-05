@@ -53,8 +53,6 @@ $('.movies-input').on('input', function () {
 }).trigger('input')
 
 async function loadGraph(personId) {
-    document.getElementById('graph').innerHTML = ''
-
     try {
         showLoader()
         const response = await fetch(BASE_URL + '/make_graph', {
@@ -84,7 +82,7 @@ async function loadGraph(personId) {
 
         if (response.ok) {
             const data = await response.json()
-            clearPersonInfo()
+            saveSearchToHistory(data)
             drawGraph(data, personId)
             getTokens()
             hideLoader()
@@ -100,14 +98,15 @@ async function loadGraph(personId) {
     /*fetch('http://localhost:8080/js/data/test-graph-1.json')
         .then(response => response.json())
         .then(data => {
+            saveSearchToHistory(data)
             drawGraph(data, personId)
         })
         .catch(error => console.error('Ошибка получения данных:', error));*/
 }
 
 function drawGraph(data, personId) {
-
-    //saveSearchToHistory(data)
+    clearPersonInfo()
+    document.getElementById('graph').innerHTML = ''
 
     const svg = d3.select("svg")
     let width = +svg.attr("width")
@@ -153,6 +152,7 @@ function drawGraph(data, personId) {
             .on("drag", dragged)
             .on("end", dragended))
         .on("click", function(event, d) {
+            console.log(d.id)
             getPersonInfo(d.id)
         })
 
@@ -318,13 +318,11 @@ function fillTokens(data) {
 }
 
 function saveSearchToHistory(data) {
-    console.log(localStorage.getItem('searchHistory'))
-
     let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || []
 
     searchHistory.push({
         personId: $('.person-id-input').val(),
-        filter: {
+        filters: {
             depth: $('.depth-input').val(),
             peopleLimit: $('.people-limit-input').val(),
             movieLimitForPerson: $('.movie-limit-for-person-input').val(),
@@ -341,7 +339,14 @@ function saveSearchToHistory(data) {
         },
         edges: data.edges,
         nodes: data.nodes,
-        date: new Date()
+        date: new Date().toLocaleString('ru', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        })
     })
 
     localStorage.setItem('searchHistory', JSON.stringify(searchHistory))
