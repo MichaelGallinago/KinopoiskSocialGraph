@@ -50,7 +50,7 @@
             </div>
         </div>
         <div id="graph-container">
-            <svg width="1200" height="800" id="graph"></svg>
+            <svg id="graph"></svg>
         </div>
         <div class="filters-container panel">
             <div class="filter">
@@ -58,7 +58,7 @@
                     <span class="key">Длина колена</span>
                     <span class="value" id="depth-text"></span>
                 </div>
-                <input type="range" class="depth-input" min="1" max="5" id="depth-input">
+                <input type="range" class="depth-input" min="1" max="5" id="depth-input" value="2">
             </div>
             <div class="filter">
                 <div class="filter-info">
@@ -177,6 +177,5 @@
     </div>
     <script src="js/graph.js"></script>
     <script src="js/menu-burger.js"></script>
-    <script src="js/search-history.js"></script>
 </body>
 </html>

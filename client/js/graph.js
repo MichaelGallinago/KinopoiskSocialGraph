@@ -95,7 +95,7 @@ async function loadGraph(personId) {
         alert('Произошла ошибка: ' + error)
     }
 
-    /*fetch('http://localhost:8080/js/data/test-graph-1.json')
+    /*fetch('http://localhost:8080/js/data/test-graph-2.json')
         .then(response => response.json())
         .then(data => {
             saveSearchToHistory(data)
@@ -108,9 +108,20 @@ function drawGraph(data, personId) {
     clearPersonInfo()
     document.getElementById('graph').innerHTML = ''
 
-    const svg = d3.select("svg")
-    let width = +svg.attr("width")
-    let height = +svg.attr("height")
+    const graphContainer = document.getElementById('graph-container');
+    const containerWidth = graphContainer.clientWidth;
+    const containerHeight = graphContainer.clientHeight;
+
+    const svg = d3.select("svg");
+    let width = +svg.attr("width");
+    let height = +svg.attr("height");
+
+    if (width === 0 && height === 0) {
+        width = containerWidth;
+        height = containerHeight;
+    } else if (width === '100%' || height === '100%') {
+        throw new Error('Недопустимые значения ширины или высоты SVG');
+    }
 
     let centerX = width / 2;
     let centerY = height / 2;
@@ -175,6 +186,16 @@ function drawGraph(data, personId) {
             .attr("cx", d => d.x)
             .attr("cy", d => d.y);
     });
+
+    const zoom = d3.zoom()
+        .scaleExtent([1, 10]) // Устанавливаем пределы масштабирования
+        //.translateExtent([[0, 0], [width, height]]) // Устанавливаем пределы перемещения
+        .extent([[0, 0], [width, height]]) // Устанавливаем область видимости
+        .on("zoom", function (event) {
+            svg.attr("transform", event.transform);
+        }); // Добавляем обработчик события зума
+
+    svg.call(zoom); // Применяем функцию зума к SVG
 
     function dragstarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();

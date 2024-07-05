@@ -11,7 +11,6 @@ $(document).ready(() => {
 
 function showMenu() {
     this.classList.toggle('active')
-    console.log('test')
     $('.sidebar').toggleClass('open')
 }
 
@@ -48,43 +47,42 @@ function openHistory() {
         const currentData = data.filter(d => d.personId == personIdValue && d.date == dateValue)
 
         $('.person-id-input').val(personIdValue)
-        $('.person-id-label').val(personIdValue)
 
         $('.depth-input').val(currentData[0].filters.depth)
-        $('#depth-text').val(currentData[0].filters.depth)
+        $('#depth-text').text(currentData[0].filters.depth)
 
         $('.people-limit-input').val(currentData[0].filters.peopleLimit)
-        $('.people-limit-text').val(currentData[0].filters.peopleLimit)
+        $('.people-limit-text').text(currentData[0].filters.peopleLimit)
 
         $('.movie-limit-for-person-input').val(currentData[0].filters.movieLimitForPerson)
-        $('.movie-limit-for-person-text').val(currentData[0].filters.movieLimitForPerson)
+        $('.movie-limit-for-person-text').text(currentData[0].filters.movieLimitForPerson)
 
         $('.movie-min-for-edge-input').val(currentData[0].filters.movieMinForEdge)
-        $('.movie-min-for-edge-text').val(currentData[0].filters.movieMinForEdge)
+        $('.movie-min-for-edge-text').text(currentData[0].filters.movieMinForEdge)
 
         $('.age-input-left-range').val(currentData[0].filters.ageLeft)
-        $('#left-age-text').val(currentData[0].filters.ageLeft)
+        $('#left-age-text').text(currentData[0].filters.ageLeft)
 
         $('.age-input-right-range').val(currentData[0].filters.ageRight)
-        $('#right-age-text').val(currentData[0].filters.ageRight)
+        $('#right-age-text').text(currentData[0].filters.ageRight)
 
         $('.is-alive-input').val(currentData[0].filters.isAlive)
 
         $('.height-input-left-range').val(currentData[0].filters.heightLeft)
-        $('#left-height-text').val(currentData[0].filters.heightLeft)
+        $('#left-height-text').text(currentData[0].filters.heightLeft)
 
         $('.height-input-right-range').val(currentData[0].filters.heightRight)
-        $('#right-height-text').val(currentData[0].filters.heightRight)
+        $('#right-height-text').text(currentData[0].filters.heightRight)
 
         $('.awards-input').val(currentData[0].filters.awards)
-        $('#awards-text').val(currentData[0].filters.awards)
+        $('#awards-text').text(currentData[0].filters.awards)
 
         $('.career-input').val(currentData[0].filters.career)
 
         $('.gender-input').val(currentData[0].filters.gender)
 
         $('.movies-input').val(currentData[0].filters.countOfMovies)
-        $('#movies-text').val(currentData[0].filters.countOfMovies)
+        $('#movies-text').text(currentData[0].filters.countOfMovies)
 
         drawGraph(
             {
