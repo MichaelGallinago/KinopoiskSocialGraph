@@ -30,7 +30,7 @@ $(document).ready(() => {
   });
 });
 
-//выход
+//выход 
 function logout() {
   localStorage.removeItem('login');
   localStorage.removeItem('password');
