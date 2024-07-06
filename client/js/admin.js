@@ -88,8 +88,15 @@ $(document).ready(function() {
     contentType: 'application/json',
     success: function (response) {
       const data = response.counts;
-      const labels = data.map(item => item[0]);
-      const values = data.map(item => item[1]);
+      // Создаем массив меток для оси X
+      const labels = data.map((_, index) => {
+        const date = new Date(startTime.getTime());
+        date.setHours(date.getHours() + index * intervalLength);
+        return date.toISOString();
+      });
+
+      // Создаем массив значений для оси Y
+      const values = data;
 
       const ctx = document.getElementById('newUsersChart').getContext('2d');
       const chart = new Chart(ctx, {
