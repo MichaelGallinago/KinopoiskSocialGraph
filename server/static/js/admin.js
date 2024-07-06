@@ -24,8 +24,12 @@ $(document).ready(() => {
         console.log(response.message);
       },
       error: function(error) {
-        console.error(error.responseJSON.error);
+        console.error('Error ' + error.status + ': ' + error.statusText);
+        if (error.responseJSON && error.responseJSON.error) {
+          console.error(error.responseJSON.error);
+        }
       }
+
     });
   });
 });
