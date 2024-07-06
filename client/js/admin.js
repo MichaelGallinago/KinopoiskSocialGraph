@@ -94,12 +94,10 @@ $(document).ready(function() {
       const data = response.counts;
       // Создаем массив меток для оси X
       const labels = data.map((_, index) => {
-        const date = new Date(startTime);
-        date.setHours(date.getHours() + index * intervalLength);
+        const date = new Date(startTime.getTime() + index * intervalLength * 60 * 60 * 1000);
         return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
       });
-
-
+      
       // Создаем массив значений для оси Y
       const values = data;
 
