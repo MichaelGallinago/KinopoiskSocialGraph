@@ -86,9 +86,9 @@ $.ajax({
   }),
   contentType: 'application/json',
   success: function(response) {
-
-    const labels = response.map(item => item[0]);
-    const data = response.map(item => item[1]);
+    const data = response.counts;
+    const labels = data.map(item => item[0]);
+    const values = data.map(item => item[1]);
 
     const ctx = document.getElementById('newUsersChart').getContext('2d');
     const chart = new Chart(ctx, {
@@ -97,7 +97,7 @@ $.ajax({
         labels: labels,
         datasets: [{
           label: 'Новые пользователи',
-          data: data,
+          data: values,
           backgroundColor: 'rgb(155,127,243)'
         }]
       },
@@ -127,6 +127,7 @@ $.ajax({
 });
 
 //посещаемость
+/*
 $.ajax({
   type: 'POST',
   url: BASE_URL + '/get_logins_statistic',
@@ -176,3 +177,4 @@ $.ajax({
     console.error(error);
   }
 });
+*/
