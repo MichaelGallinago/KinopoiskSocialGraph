@@ -77,14 +77,14 @@ document.getElementById('db-size-stat').textContent =
 */
 
 //новые юзеры
-const startTime = '2024-07-01T00:00:00';
+const startTime = new Date('2024-07-01T00:00:00');
 const intervalLength = 2;
 $(document).ready(function() {
   $.ajax({
     type: 'POST',
     url: BASE_URL + '/get_registrations_statistic',
     data: JSON.stringify({
-      start_time: startTime,
+      start_time: startTime.toISOString(),
       interval_length: intervalLength
     }),
     contentType: 'application/json',
