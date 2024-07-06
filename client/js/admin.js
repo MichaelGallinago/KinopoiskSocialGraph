@@ -1,148 +1,45 @@
-/*document.getElementById('change-tokens-form').addEventListener('submit', function(event) {
-  event.preventDefault();
-
-  const username = document.getElementById('username-input').value;
-  const newTokens = document.getElementById('tokens-input').value;
-
-  fetch('/change_tokens', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ username, newTokens })
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Failed to change tokens.');
-    }
-  })
-  .then(data => {
-    //console.log(data.message);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-});
-
-function getStats() {
-  fetch('/get_new_users_stats')
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Failed to get new users stats.');
-    }
-  })
-  .then(data => {
-    document.getElementById('new-users-stat').textContent = data.new_users;
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-  fetch('/get_visits_stats')
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Failed to get visits stats.');
-    }
-  })
-  .then(data => {
-    document.getElementById('visits-stat').textContent = data.visits;
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-  fetch('/get_db_size')
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Failed to get database size.');
-    }
-  })
-  .then(data => {
-    document.getElementById('db-size-stat').textContent = data.db_size;
-  })
-  .catch(error => {
-    console.error(error);
-  });
-}
-
-getStats();
-
-*/
-
-// это пример, надо поменять на реальные данные
-/*const newUsersData = {
-  labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
-  datasets: [{
-    label: 'Новых пользователей',
-    data: [12, 19, 3, 5, 2, 3, 7],
-    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-    borderColor: 'rgba(75, 192, 192, 1)',
-    borderWidth: 1
-  }]
-};
-
-const visitsData = {
-  labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
-  datasets: [{
-    label: 'Посещений',
-    data: [25, 32, 18, 22, 15, 28, 35],
-    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-    borderColor: 'rgba(153, 102, 255, 1)',
-    borderWidth: 1
-  }]
-};
-
-
-const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
-const newUsersChart = new Chart(newUsersCtx, {
-  type: 'bar',
-  data: newUsersData,
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
-});
-
-const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-const visitsChart = new Chart(visitsCtx, {
-  type: 'line',
-  data: visitsData,
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
-});
-*/
-
-//кнопка выхода
+//set_tokens
 $(document).ready(() => {
-    $('.admin-logout-button').on('click', logout);
+  $('.admin-logout-button').on('click', logout);
+  $('.admin-button').on('click', function(event) {
+
+    const targetLogin = $('#username-input').val();
+    const newTokenValue = $('#tokens-input').val();
+
+    const data = {
+      login: localStorage.getItem('login'),
+      password: localStorage.getItem('password'),
+      value: newTokenValue,
+      target_login: targetLogin
+    };
+
+    $.ajax({
+      type: 'POST',
+      url: '/set_tokens',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function(response) {
+        console.log(response.message);
+      },
+      error: function(error) {
+        console.error(error.responseJSON.error);
+      }
+    });
+  });
 });
 
+//выход
 function logout() {
-    localStorage.removeItem('login');
-    localStorage.removeItem('password');
-    window.location.href = 'index.html';
+  localStorage.removeItem('login');
+  localStorage.removeItem('password');
+  window.location.href = 'index.html';
 }
+
 //getRegistrationsStatistic
 function getRegistrationsStatistic() {
   const data = {
-    start_time: '2024-06-29T14:30:45.123Z', // начальная дата для статистики
-    interval_length: 24 // длительность интервала в часах
+    start_time: '2024-06-29T14:30:45.123Z', // начальная дата
+    interval_length: 24 // в часах
   };
   fetch('/get_registrations_statistic', {
     method: 'POST',
@@ -269,7 +166,6 @@ function getLoginsStatistic() {
 
 getLoginsStatistic();
 
-
 //пример
 const loginsData = {
   labels: ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05", "2024-02-06", "2024-02-07"],
@@ -325,3 +221,4 @@ document.getElementById('db-size-stat').textContent =
     `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
 
 */
+
