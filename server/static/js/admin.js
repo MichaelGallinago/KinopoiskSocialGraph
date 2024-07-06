@@ -4,7 +4,7 @@ const BASE_URL = "http://192.168.0.85:5000"
 $(document).ready(() => {
   $('.admin-logout-button').on('click', logout);
   $('.admin-button').on('click', function(event) {
-
+    event.preventDefault();
     const targetLogin = $('#username-input').val();
     const newTokenValue = $('#tokens-input').val();
 
@@ -14,6 +14,10 @@ $(document).ready(() => {
       value: newTokenValue,
       target_login: targetLogin
     };
+
+    console.log('targetLogin:', targetLogin);
+    console.log('newTokenValue:', newTokenValue);
+    console.log('data:', data);
 
     $.ajax({
       type: 'POST',
