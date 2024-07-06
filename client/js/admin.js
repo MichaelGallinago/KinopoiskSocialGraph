@@ -90,7 +90,7 @@ $(document).ready(function() {
     contentType: 'application/json',
 
     success: function (response) {
-      startTime = new Date('startTime');
+      startTime = new Date(startTime);
       const data = response.counts;
       // Создаем массив меток для оси X
       const labels = data.map((_, index) => {
