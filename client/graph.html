@@ -19,6 +19,7 @@
             <input type="text" id="person-id" class="person-id-input" required />
             <button type="submit" id="load-graph" class="load-graph-btn">Загрузить</button>
         </form>
+        <button class="save-to-favourites-btn glowing-button">Добавить в избранное</button>
         <div class="right-nav-content">
             <div class="tokens-container">
                 <span class="tokens-text">Токены:</span>
@@ -173,6 +174,15 @@
                 <h2 class="login-title">История запросов</h2>
                 <div class="history-elements"></div>
             </div>
+        <!--</div>-->
+    </div>
+    <div class="favourites-modal modal">
+        <!--<div class="modal-overlay close-favourites-btn" data-close="true">-->
+        <div class="modal-window">
+            <img src="img/close-icon.png" alt="Close" class="close-favourites-btn">
+            <h2 class="login-title">Избранное</h2>
+            <div class="favourites-elements"></div>
+        </div>
         <!--</div>-->
     </div>
     <script src="js/graph.js"></script>

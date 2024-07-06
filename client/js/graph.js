@@ -8,6 +8,8 @@ document.getElementById('graph-form').addEventListener('submit', async function 
     await loadGraph(personId)
 })
 
+let graphData = null
+
 $(document).ready(function () {
     getTokens()
 })
@@ -81,7 +83,7 @@ async function loadGraph(personId) {
         })
 
         if (response.ok) {
-            const data = await response.json()
+            const data  = await response.json()
             saveSearchToHistory(data)
             drawGraph(data, personId)
             getTokens()
@@ -95,7 +97,7 @@ async function loadGraph(personId) {
         alert('Произошла ошибка: ' + error)
     }
 
-    /*fetch('http://localhost:8080/js/data/test-graph-2.json')
+    /*fetch('http://localhost:8080/js/data/test-graph-1.json')
         .then(response => response.json())
         .then(data => {
             saveSearchToHistory(data)
@@ -107,6 +109,8 @@ async function loadGraph(personId) {
 function drawGraph(data, personId) {
     clearPersonInfo()
     document.getElementById('graph').innerHTML = ''
+
+    graphData = data
 
     const graphContainer = document.getElementById('graph-container');
     const containerWidth = graphContainer.clientWidth;
@@ -163,7 +167,6 @@ function drawGraph(data, personId) {
             .on("drag", dragged)
             .on("end", dragended))
         .on("click", function(event, d) {
-            console.log(d.id)
             getPersonInfo(d.id)
         })
 
@@ -213,6 +216,8 @@ function drawGraph(data, personId) {
         d.fx = null;
         d.fy = null;
     }
+
+    checkFavouritesHasGraph(personId)
 }
 
 function showLoader() {
@@ -372,3 +377,71 @@ function saveSearchToHistory(data) {
 
     localStorage.setItem('searchHistory', JSON.stringify(searchHistory))
 }
+
+function saveGraphToFavourites() {
+    let favourites = JSON.parse(localStorage.getItem('favourites')) || []
+    const personId = $('.person-id-input').val()
+
+    const searchHistory = JSON.parse(localStorage.getItem('searchHistory'))
+    const filters = getFilters()
+    const temp = searchHistory.filter(d => d.personId === personId && JSON.stringify(d.filters) === JSON.stringify(filters))
+
+    const date = temp == null || temp.length === 0 ? null : temp[0].date
+
+    if (date != null) {
+        favourites.push({
+            personId: personId,
+            filters: getFilters(),
+            edges: graphData.edges,
+            nodes: graphData.nodes,
+            date: date
+        })
+
+        localStorage.setItem('favourites', JSON.stringify(favourites))
+        disableSaveToFavouritesBtn()
+    }
+}
+
+function checkFavouritesHasGraph(personId) {
+    const favourites = JSON.parse(localStorage.getItem('favourites'))
+
+    const filters = getFilters()
+
+    if (favourites != null) {
+        const temp = favourites.filter(d => d.personId === personId && JSON.stringify(d.filters) == JSON.stringify(filters))
+
+        temp == null || temp.length === 0 ? enableSaveToFavouritesBtn() : disableSaveToFavouritesBtn()
+    } else {
+        enableSaveToFavouritesBtn()
+    }
+}
+
+function getFilters() {
+    return filters = {
+        depth: $('.depth-input').val(),
+        peopleLimit: $('.people-limit-input').val(),
+        movieLimitForPerson: $('.movie-limit-for-person-input').val(),
+        movieMinForEdge: $('.movie-min-for-edge-input').val(),
+        ageLeft: $('.age-input-left-range').val(),
+        ageRight: $('.age-input-right-range').val(),
+        isAlive: $('.is-alive-input').val(),
+        heightLeft: $('.height-input-left-range').val(),
+        heightRight: $('.height-input-right-range').val(),
+        awards: $('.awards-input').val(),
+        career: $('.career-input').val(),
+        gender: $('.gender-input').val(),
+        countOfMovies: $('.movies-input').val()
+    }
+}
+
+/*function deleteGraphFromFavourites(personId, date) {
+    let favourites = JSON.parse(localStorage.getItem('favourites'))
+
+    console.log(favourites.length)
+    favourites.filter(d => {
+        d.personId != personId && d.date != date
+    })
+
+    console.log(favourites.length)
+    localStorage.setItem('favourites', JSON.stringify(favourites))
+}*/
