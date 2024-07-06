@@ -1,5 +1,6 @@
 ﻿import datetime
 from datetime import timedelta
+from waitress import serve
 
 from database import Database
 from flask import Flask, request, jsonify, Response, stream_with_context, redirect, url_for, render_template
@@ -204,4 +205,4 @@ def generate_graph_stream(graph):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    serve(app, host='0.0.0.0', port=5000)
