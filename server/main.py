@@ -2,14 +2,14 @@
 from datetime import timedelta
 
 from database import Database
-from flask import Flask, request, jsonify, Response, stream_with_context
+from flask import Flask, request, jsonify, Response, stream_with_context, redirect, url_for, render_template
 from flask_cors import CORS
 from flask_pymongo import PyMongo
 from werkzeug.security import check_password_hash
 from email_validator import validate_email, EmailNotValidError
 import json
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
 db = Database(PyMongo(app).db)
 CORS(app)
@@ -18,6 +18,26 @@ REQUIRED_KEYS = ['login', 'password',
                  'personId', 'depth', 'peopleLimit', 'movieLimitForPerson',
                  'movieMinForEdge', 'ageLeft', 'ageRight', 'isAlive', 'heightLeft',
                  'heightRight', 'awards', 'career', 'gender', 'countOfMovies']
+
+
+@app.route('/')
+def home():
+    return redirect(url_for('index'))
+
+
+@app.route('/index.html')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/graph.html')
+def graph():
+    return render_template('graph.html')
+
+
+@app.route('/admin_win.html')
+def admin_win():
+    return render_template('admin_win.html')
 
 
 @app.route('/register', methods=['POST'])
@@ -160,9 +180,11 @@ def get_registrations_statistic():
         return jsonify({"error": "Invalid input"}), 400
 
     start_time = datetime.datetime.fromisoformat(data["start_time"])
-    interval = timedelta(seconds=data["interval_length"])
+    interval = timedelta(hours=data["interval_length"])
 
-    return db.count_registrations(start_time, interval), 200
+    test = db.count_registrations(start_time, interval)
+    print(test)
+    return test, 200
 
 
 def generate_graph_stream(graph):
@@ -184,4 +206,4 @@ def generate_graph_stream(graph):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

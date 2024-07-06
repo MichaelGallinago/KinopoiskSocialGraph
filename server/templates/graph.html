@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>КиноГраф</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/graph.css">
-    <link rel="stylesheet" type="text/css" href="css/menu-burger.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/graph.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/menu-burger.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="loader loader-hidden"></div>
     <header class="navigation">
-        <img src="img/logo.png" alt="КиноГраф" class="logo">
+        <img src="../static/img/logo.png" alt="КиноГраф" class="logo">
         <form id="graph-form" class="graph-form">
             <span class="person-id-label">ID человека:</span>
             <input type="text" id="person-id" class="person-id-input" required />
@@ -170,7 +170,7 @@
     <div class="history-modal modal">
         <!--<div class="modal-overlay close-history-btn" data-close="true">-->
             <div class="modal-window">
-                <img src="img/close-icon.png" alt="Close" class="close-history-btn">
+                <img src="../static/img/close-icon.png" alt="Close" class="close-history-btn">
                 <h2 class="login-title">История запросов</h2>
                 <div class="history-elements"></div>
             </div>
@@ -179,13 +179,13 @@
     <div class="favourites-modal modal">
         <!--<div class="modal-overlay close-favourites-btn" data-close="true">-->
         <div class="modal-window">
-            <img src="img/close-icon.png" alt="Close" class="close-favourites-btn">
+            <img src="../static/img/close-icon.png" alt="Close" class="close-favourites-btn">
             <h2 class="login-title">Избранное</h2>
             <div class="favourites-elements"></div>
         </div>
         <!--</div>-->
     </div>
-    <script src="js/graph.js"></script>
-    <script src="js/menu-burger.js"></script>
+    <script src="../static/js/graph.js"></script>
+    <script src="../static/js/menu-burger.js"></script>
 </body>
 </html>
