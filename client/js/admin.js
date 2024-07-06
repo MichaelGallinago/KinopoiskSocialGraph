@@ -1,3 +1,5 @@
+const BASE_URL = "http://127.0.0.1:5000"
+
 //set_tokens
 $(document).ready(() => {
   $('.admin-logout-button').on('click', logout);
@@ -15,7 +17,7 @@ $(document).ready(() => {
 
     $.ajax({
       type: 'POST',
-      url: '/set_tokens',
+      url: BASE_URL + '/set_tokens',
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: function(response) {
@@ -35,55 +37,100 @@ function logout() {
   window.location.href = 'index.html';
 }
 
-//getRegistrationsStatistic
-function getRegistrationsStatistic() {
-  const data = {
-    start_time: '2024-06-29T14:30:45.123Z', // начальная дата
-    interval_length: 24 // в часах
-  };
-  fetch('/get_registrations_statistic', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Failed to get registrations statistic.');
-    }
-  })
-  .then(data => {
-      const newUsersData = {
-      labels: data.labels,
-      datasets: [{
-        label: 'Новых пользователей',
-        data: data.data,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-      }]
-    };
+//get_db_statistic
+fetch(BASE_URL + '/get_db_statistic')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('db-size-stat').textContent =
+            `Фильмы: ${data.films}, Персоны: ${data.persons}, ` +
+            `Сотрудники: ${data.staff}, Пользователи: ${data.users}, ` +
+            `Регистрации: ${data.registrations}, Входы: ${data.logins}`;
+    })
+    .catch(error => {
+        console.error(error);
+    });
 
-    const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
-    const newUsersChart = new Chart(newUsersCtx, {
+
+//пример + json файл
+/*
+let dbStat = {
+    "films": 10,
+    "persons": 20,
+    "staff": 5,
+    "users": 3,
+    "registrations": 2,
+    "logins": 1
+};
+
+// Выводим статистику базы данных на страницу
+document.getElementById('db-size-stat').textContent =
+    `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
+
+*/
+
+
+
+
+
+
+//getRegistrationsStatistic новые пользователи
+/*
+{
+  "start_time": "2023-01-01T00:00:00",
+  "interval_length": 1 //промежуток в часах
+}
+*/
+// Отправляем POST-запрос на сервер для получения статистики новых пользователей
+$.ajax({
+  type: 'POST',
+  url: BASE_URL + '/get_registrations_statistic',
+  data: JSON.stringify({
+    start_time: '2024-07-01T00:00:00',
+    interval_length: 2
+  }),
+  contentType: 'application/json',
+  success: function(response) {
+    // Получаем данные из ответа сервера
+    const labels = response.map(item => item[0]);
+    const data = response.map(item => item[1]);
+
+    // Создаем график с помощью библиотеки Chart.js
+    const ctx = document.getElementById('newUsersChart').getContext('2d');
+    const chart = new Chart(ctx, {
       type: 'bar',
-      data: newUsersData,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Новые пользователи',
+          data: data,
+          backgroundColor: 'rgba(75, 192, 192, 1)'
+        }]
+      },
       options: {
+        responsive: true,
         scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'hour'
+            }
+          },
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Количество пользователей'
+            }
           }
         }
       }
     });
-  })
-  .catch(error => {
+  },
+  error: function(error) {
     console.error(error);
-  });
-}
+  }
+});
+
 
 getRegistrationsStatistic();
 
@@ -114,13 +161,13 @@ const newUsersChart = new Chart(newUsersCtx, {
 });
 
 
-//getLoginsStatistic
+//getLoginsStatistic посетители
 function getLoginsStatistic() {
   const data = {
     start_time: '2024-06-29T14:30:45.123Z', // начальная дата для статистики
     interval_length: 30 // длительность интервала в днях
   };
-  fetch('/get_logins_statistic', {
+  fetch(BASE_URL + '/get_logins_statistic', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -190,35 +237,3 @@ const loginsChart = new Chart(loginsCtx, {
     }
   }
 });
-
-//get_db_statistic
-fetch('/get_db_statistic')
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('db-size-stat').textContent =
-            `Фильмы: ${data.films}, Персоны: ${data.persons}, ` +
-            `Сотрудники: ${data.staff}, Пользователи: ${data.users}, ` +
-            `Регистрации: ${data.registrations}, Входы: ${data.logins}`;
-    })
-    .catch(error => {
-        console.error(error);
-    });
-
-
-//пример
-/*
-let dbStat = {
-    "films": 10,
-    "persons": 20,
-    "staff": 5,
-    "users": 3,
-    "registrations": 2,
-    "logins": 1
-};
-
-// Выводим статистику базы данных на страницу
-document.getElementById('db-size-stat').textContent =
-    `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
-
-*/
-
