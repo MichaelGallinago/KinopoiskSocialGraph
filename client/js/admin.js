@@ -190,8 +190,6 @@ function getRegistrationsStatistic() {
 
 getRegistrationsStatistic();
 
-
-
 //пример
 
 const newUsersData = {
@@ -273,7 +271,6 @@ getLoginsStatistic();
 
 
 //пример
-
 const loginsData = {
   labels: ["2024-02-01", "2024-02-02", "2024-02-03", "2024-02-04", "2024-02-05", "2024-02-06", "2024-02-07"],
   datasets: [{
@@ -298,73 +295,33 @@ const loginsChart = new Chart(loginsCtx, {
   }
 });
 
-function getDbStatistic() {
-  fetch('/get_db_statistic')
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error('Failed to get database statistic.');
-      }
-    })
+//get_db_statistic
+fetch('/get_db_statistic')
+    .then(response => response.json())
     .then(data => {
-      document.getElementById('db-size-stat').textContent =
-        `Фильмы: ${data.films}, Персоны: ${data.persons}, ` +
-        `Сотрудники: ${data.staff}, Пользователи: ${data.users}, ` +
-        `Регистрации: ${data.registrations}, Входы: ${data.logins}`;
+        document.getElementById('db-size-stat').textContent =
+            `Фильмы: ${data.films}, Персоны: ${data.persons}, ` +
+            `Сотрудники: ${data.staff}, Пользователи: ${data.users}, ` +
+            `Регистрации: ${data.registrations}, Входы: ${data.logins}`;
     })
     .catch(error => {
-      console.error(error);
+        console.error(error);
     });
-}
 
-getDbStatistic();
 
-const data = {
-  'films': 41252,
-  'persons': 270268,
-  'staff': 37141,
-  'users': 4,
-  'registrations': 3,
-  'logins': 27
+//пример
+/*
+let dbStat = {
+    "films": 10,
+    "persons": 20,
+    "staff": 5,
+    "users": 3,
+    "registrations": 2,
+    "logins": 1
 };
 
+// Выводим статистику базы данных на страницу
+document.getElementById('db-size-stat').textContent =
+    `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
 
-// пример get_db_statistic
-const ctx = document.getElementById('myChart').getContext('2d');
-const myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Фильмы', 'Персоны', 'Сотрудники', 'Пользователи', 'Регистрации', 'Входы'],
-        datasets: [{
-            label: '# Количество',
-            data: [data.films, data.persons, data.staff, data.users, data.registrations, data.logins],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
-
-
+*/

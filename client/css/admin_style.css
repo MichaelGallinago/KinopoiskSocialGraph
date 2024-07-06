@@ -126,11 +126,18 @@
 
 .admin-stat {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 20px;
     margin-bottom: 30px;
     width: 50%;
+}
+
+.admin-stat-db {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 30px;
+    width: 100%;
 }
 
 .admin-stat:last-child {
@@ -144,14 +151,20 @@
 }
 
 .admin-stat-title {
+    padding: 5% 3%;
     font-size: 24px;
     font-weight: bold;
+    width: 30%;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .admin-stat-value {
-    font-size: 36px;
+    padding: 5% 0%;
+    font-size: 24px;
     font-weight: bold;
-}
+    width: 70%;
+    }
 
 ::selection {
     background-color: #726253;
