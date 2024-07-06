@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5000"
+const BASE_URL = "http://192.168.0.85:5000"
 
 document.getElementById('graph-form').addEventListener('submit', async function (event) {
     event.preventDefault()
