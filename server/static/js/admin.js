@@ -78,7 +78,7 @@ document.getElementById('db-size-stat').textContent =
 
 //новые юзеры
 startTime = '2024-07-01T00:00:00';
-intervalLength = 2;
+intervalLength = 12;
 $(document).ready(function() {
   $.ajax({
     type: 'POST',
@@ -136,54 +136,59 @@ $(document).ready(function() {
 });
 
 //посещаемость
-/*
-$.ajax({
-  type: 'POST',
-  url: BASE_URL + '/get_logins_statistic',
-  data: JSON.stringify({
-    start_time: '2024-07-01T00:00:00',
-    interval_length: 2
-  }),
-  contentType: 'application/json',
-  success: function(response) {
+startTime = '2024-07-01T00:00:00';
+intervalLength = 12;
+  $(document).ready(function() {
+  $.ajax({
+    type: 'POST',
+    url: BASE_URL + '/get_logins_statistic',
+    data: JSON.stringify({
+      start_time: startTime,
+      interval_length: intervalLength
+    }),
+    contentType: 'application/json',
+    success: function(response) {
+      startTime = new Date(startTime);
+      const data = response.counts;
+      // Создаем массив меток для оси X
+      const labels = data.map((_, index) => {
+        const date = new Date(startTime.getTime() + index * intervalLength * 60 * 60 * 1000);
+        return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      });
 
-    const labels = response.map(item => item[0]);
-    const data = response.map(item => item[1]);
+      const values = data;
 
-    const ctx = document.getElementById('visitsChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Посещения сайта',
-          data: data,
-          borderColor: 'rgb(101,223,108)',
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'day'
-            }
-          },
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Количество посещений'
+      const ctx = document.getElementById('visitsChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Посещения сайта',
+            data: values,
+            borderColor: 'rgb(101,223,108)',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'category',
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Количество посещений'
+              }
             }
           }
         }
-      }
-    });
-  },
-  error: function(error) {
-    console.error(error);
-  }
+      });
+    },
+    error: function(error) {
+      console.error(error);
+    }
+  });
 });
-*/
