@@ -1,29 +1,95 @@
 $(document).ready(() => {
     $('.burger').on('click', showMenu)
 
+    /*localStorage.removeItem('searchHistory')
+    localStorage.removeItem('favourites')*/
+
+    $('.save-to-favourites-btn').attr('disabled', 'disabled').on('click', saveGraphToFavourites)
+
     $('.favourites-btn').on('click', openFavourites)
     $('.history-btn').on('click', openHistory)
     $('.admin-btn').on('click', openAdminPanel)
     $('.exit-btn').on('click', exit)
 
     $('.close-history-btn').on('click', closeHistory)
+    $('.close-favourites-btn').on('click', closeFavourites)
 })
+
+function disableSaveToFavouritesBtn() {
+    const btn = $('.save-to-favourites-btn')
+    btn.attr('disabled', 'disabled')
+    btn.text('Избранное')
+}
+
+function enableSaveToFavouritesBtn() {
+    const btn = $('.save-to-favourites-btn')
+    btn.removeAttr('disabled')
+    btn.text('Добавить в избранное')
+}
 
 function showMenu() {
     this.classList.toggle('active')
-    console.log('test')
     $('.sidebar').toggleClass('open')
 }
 
 function openFavourites() {
-    console.log('Избранное')
-    // TODO: избранное
+    closeHistory()
+
+    const data = JSON.parse(localStorage.getItem('favourites'))
+    if (data != null) {
+        data.reverse().forEach(d => {
+            $('.favourites-elements').append(`
+                <div class="favourites-element">
+                    <div class="favourites-values">
+                        <span class="favourites-element-name key">ID человека</span>
+                        <span class="favourites-element-name value">${d.personId}</span>
+                    </div>
+                    <div class="favourites-values">
+                        <span class="favourites-element-date key">Дата запроса</span>
+                        <span class="favourites-element-date value">${d.date}</span>
+                    </div>
+                </div>
+                <!--<button class="delete-from-favourites-btn"></button>-->
+            `)
+        })
+    }
+
+    /*$('.delete-from-favourites-btn').on('click', function () {
+        deleteGraphFromFavourites(personIdValue, dateValue)
+    })*/
+
+    const favouritesElement = $('.favourites-element')
+    $('.favourites-modal').css('display', 'block')
+    favouritesElement.on('click', function () {
+        const personIdValue = $(this).find('.favourites-element-name.value').text()
+        const dateValue = $(this).find('.favourites-element-date.value').text()
+
+        const currentData = data.filter(d => d.personId == personIdValue && d.date == dateValue)
+
+        fillFilters(currentData[0], personIdValue)
+
+        drawGraph(
+            {
+                edges: currentData[0].edges,
+                nodes: currentData[0].nodes
+            },
+            personIdValue
+        )
+        closeFavourites()
+    })
+}
+
+function closeFavourites() {
+    $('.favourites-elements').empty()
+    $('.favourites-modal').css('display', 'none')
 }
 
 function openHistory() {
+    closeFavourites()
+
     const data = JSON.parse(localStorage.getItem('searchHistory'))
     if (data != null) {
-        data.forEach(d => {
+        data.reverse().forEach(d => {
             $('.history-elements').append(`
             <div class="history-element">
                 <div class="history-values">
@@ -47,44 +113,7 @@ function openHistory() {
 
         const currentData = data.filter(d => d.personId == personIdValue && d.date == dateValue)
 
-        $('.person-id-input').val(personIdValue)
-        $('.person-id-label').val(personIdValue)
-
-        $('.depth-input').val(currentData[0].filters.depth)
-        $('#depth-text').val(currentData[0].filters.depth)
-
-        $('.people-limit-input').val(currentData[0].filters.peopleLimit)
-        $('.people-limit-text').val(currentData[0].filters.peopleLimit)
-
-        $('.movie-limit-for-person-input').val(currentData[0].filters.movieLimitForPerson)
-        $('.movie-limit-for-person-text').val(currentData[0].filters.movieLimitForPerson)
-
-        $('.movie-min-for-edge-input').val(currentData[0].filters.movieMinForEdge)
-        $('.movie-min-for-edge-text').val(currentData[0].filters.movieMinForEdge)
-
-        $('.age-input-left-range').val(currentData[0].filters.ageLeft)
-        $('#left-age-text').val(currentData[0].filters.ageLeft)
-
-        $('.age-input-right-range').val(currentData[0].filters.ageRight)
-        $('#right-age-text').val(currentData[0].filters.ageRight)
-
-        $('.is-alive-input').val(currentData[0].filters.isAlive)
-
-        $('.height-input-left-range').val(currentData[0].filters.heightLeft)
-        $('#left-height-text').val(currentData[0].filters.heightLeft)
-
-        $('.height-input-right-range').val(currentData[0].filters.heightRight)
-        $('#right-height-text').val(currentData[0].filters.heightRight)
-
-        $('.awards-input').val(currentData[0].filters.awards)
-        $('#awards-text').val(currentData[0].filters.awards)
-
-        $('.career-input').val(currentData[0].filters.career)
-
-        $('.gender-input').val(currentData[0].filters.gender)
-
-        $('.movies-input').val(currentData[0].filters.countOfMovies)
-        $('#movies-text').val(currentData[0].filters.countOfMovies)
+        fillFilters(currentData[0], personIdValue)
 
         drawGraph(
             {
@@ -100,6 +129,46 @@ function openHistory() {
 function closeHistory() {
     $('.history-elements').empty()
     $('.history-modal').css('display', 'none')
+}
+
+function fillFilters(data, personIdValue) {
+    $('.person-id-input').val(personIdValue)
+
+    $('.depth-input').val(data.filters.depth)
+    $('#depth-text').text(data.filters.depth)
+
+    $('.people-limit-input').val(data.filters.peopleLimit)
+    $('.people-limit-text').text(data.filters.peopleLimit)
+
+    $('.movie-limit-for-person-input').val(data.filters.movieLimitForPerson)
+    $('.movie-limit-for-person-text').text(data.filters.movieLimitForPerson)
+
+    $('.movie-min-for-edge-input').val(data.filters.movieMinForEdge)
+    $('.movie-min-for-edge-text').text(data.filters.movieMinForEdge)
+
+    $('.age-input-left-range').val(data.filters.ageLeft)
+    $('#left-age-text').text(data.filters.ageLeft)
+
+    $('.age-input-right-range').val(data.filters.ageRight)
+    $('#right-age-text').text(data.filters.ageRight)
+
+    $('.is-alive-input').val(data.filters.isAlive)
+
+    $('.height-input-left-range').val(data.filters.heightLeft)
+    $('#left-height-text').text(data.filters.heightLeft)
+
+    $('.height-input-right-range').val(data.filters.heightRight)
+    $('#right-height-text').text(data.filters.heightRight)
+
+    $('.awards-input').val(data.filters.awards)
+    $('#awards-text').text(data.filters.awards)
+
+    $('.career-input').val(data.filters.career)
+
+    $('.gender-input').val(data.filters.gender)
+
+    $('.movies-input').val(data.filters.countOfMovies)
+    $('#movies-text').text(data.filters.countOfMovies)
 }
 
 async function openAdminPanel() {
