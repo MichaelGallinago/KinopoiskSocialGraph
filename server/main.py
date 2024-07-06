@@ -182,9 +182,7 @@ def get_registrations_statistic():
     start_time = datetime.datetime.fromisoformat(data["start_time"])
     interval = timedelta(hours=data["interval_length"])
 
-    test = db.count_registrations(start_time, interval)
-    print(test)
-    return test, 200
+    return db.count_registrations(start_time, interval), 200
 
 
 def generate_graph_stream(graph):
