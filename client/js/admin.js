@@ -77,53 +77,55 @@ document.getElementById('db-size-stat').textContent =
 */
 
 //новые юзеры
-$.ajax({
-  type: 'POST',
-  url: BASE_URL + '/get_registrations_statistic',
-  data: JSON.stringify({
-    start_time: '2024-07-01T00:00:00',
-    interval_length: 2
-  }),
-  contentType: 'application/json',
-  success: function(response) {
-    const data = response.counts;
-    const labels = data.map(item => item[0]);
-    const values = data.map(item => item[1]);
+$(document).ready(function() {
+  $.ajax({
+    type: 'POST',
+    url: BASE_URL + '/get_registrations_statistic',
+    data: JSON.stringify({
+      start_time: '2024-07-01T00:00:00',
+      interval_length: 2
+    }),
+    contentType: 'application/json',
+    success: function (response) {
+      const data = response.counts;
+      const labels = data.map(item => item[0]);
+      const values = data.map(item => item[1]);
 
-    const ctx = document.getElementById('newUsersChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Новые пользователи',
-          data: values,
-          backgroundColor: 'rgb(155,127,243)'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'hour'
-            }
-          },
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Количество пользователей'
+      const ctx = document.getElementById('newUsersChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Новые пользователи',
+            data: values,
+            backgroundColor: 'rgb(155,127,243)'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'hour'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Количество пользователей'
+              }
             }
           }
         }
-      }
-    });
-  },
-  error: function(error) {
-    console.error(error);
-  }
+      });
+    },
+    error: function (error) {
+      console.error(error);
+    }
+  });
 });
 
 //посещаемость
