@@ -1,23 +1,22 @@
-.login-modal {}
-
-.login-modal.open .auth-overlay,
-.login-modal.open .auth-modal-window {
+.modal-window.open .modal-overlay,
+.modal-window.open .auth-modal-window {
     opacity: 1;
     z-index: 1000;
 }
 
-.auth-overlay, .auth-modal-window {
+.modal-overlay, .auth-modal-window {
     opacity: 0;
     z-index: -1;
 }
 
-.auth-overlay {
+.modal-overlay {
     position: fixed;
     top: 0;
     right: 0;
     left: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
+    transition: transform 0.5s ease;
 }
 
 .auth-modal-window {
