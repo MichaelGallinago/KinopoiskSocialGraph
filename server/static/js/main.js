@@ -1,7 +1,7 @@
 const BASE_URL = "http://192.168.0.85:5000"
 
 const loginModal = $.modal()
-const openLoginWindow = document.getElementById('open-login-window')
+const openLoginWindow = document.querySelector('.open-login-window-btn')
 openLoginWindow.addEventListener('click', event => {
     loginModal.open()
 })

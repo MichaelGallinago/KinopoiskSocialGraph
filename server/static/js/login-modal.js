@@ -2,6 +2,7 @@ function _createModal(options) {
     const modal = document.createElement('div')
     modal.setAttribute('id', 'login-form')
     modal.classList.add('login-modal')
+    modal.classList.add('modal-window')
     modal.insertAdjacentHTML('afterbegin', `
         <div class="modal-overlay" data-close="true">
             <div class="auth-modal-window">
