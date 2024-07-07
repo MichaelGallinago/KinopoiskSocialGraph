@@ -9,9 +9,9 @@ openLoginWindow.addEventListener('click', event => {
 document.getElementById('register-form').addEventListener('submit', async function (event) {
     event.preventDefault()
 
-    const login = document.getElementById('register-login-input').value
-    const email = document.getElementById('register-email-input').value
-    const password = document.getElementById('register-password-input').value
+    const login = document.querySelector('.register-login-input').value
+    const email = document.querySelector('.register-email-input').value
+    const password = document.querySelector('.register-password-input').value
 
     await register(login, email, password)
 })
@@ -19,8 +19,8 @@ document.getElementById('register-form').addEventListener('submit', async functi
 document.getElementById('login-form').addEventListener('submit', async function  (event) {
     event.preventDefault()
 
-    const login = document.getElementById('login-input').value
-    const password = document.getElementById('password-input').value
+    const login = document.querySelector('.login-input').value
+    const password = document.querySelector('.password-input').value
 
     await auth(login, password)
 })
