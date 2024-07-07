@@ -76,11 +76,21 @@ document.getElementById('db-size-stat').textContent =
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
-      const datePart = startDate.split(' ')[0].replace(/,/g, '').split('.');
+            console.log(`startDate: ${startDate}`);
+      const dateAndTimePart = startDate.split(' ')[0];
+            console.log(`dateAndTimePart: ${dateAndTimePart}`);
+      const datePart = dateAndTimePart.replace(/,/g, '').split('.');
+            console.log(`datePart: ${datePart}`);
       const timePart = startDate.split(' ')[1] || '00:00';
+            console.log(`timePart: ${timePart}`);
       const [day, month, year] = datePart;
+            console.log(`day: ${day}`);
+            console.log(`month: ${month}`);
+            console.log(`year: ${year}`);
       const [hour, minute] = timePart.split(':');
-
+            console.log(`hour: ${hour}`);
+            console.log(`minute: ${minute}`);
+            
       if (datePart.length < 3 || timePart.length < 2) {
         console.error('Invalid date format');
         return;
