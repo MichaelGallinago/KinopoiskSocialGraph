@@ -75,7 +75,7 @@ document.getElementById('db-size-stat').textContent =
 
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
-      const startDate = $('#start-date-input').val();
+      const startDate = new Date($('#start-date-input').val());
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
