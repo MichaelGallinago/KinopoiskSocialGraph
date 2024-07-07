@@ -3,8 +3,8 @@ const BASE_URL = "http://192.168.0.85:5000"
 //токены
 $(document).ready(() => {
   $('.admin-logout-button').on('click', logout);
-  $('.admin-button').on('click', function(event) {
-
+  $('#change-button').on('click', function(event) {
+    event.preventDefault();
     const targetLogin = $('#username-input').val();
     const newTokenValue = $('#tokens-input').val();
 
@@ -24,8 +24,12 @@ $(document).ready(() => {
         console.log(response.message);
       },
       error: function(error) {
-        console.error(error.responseJSON.error);
+        console.error('Error ' + error.status + ': ' + error.statusText);
+        if (error.responseJSON && error.responseJSON.error) {
+          console.error(error.responseJSON.error);
+        }
       }
+
     });
   });
 });
@@ -50,21 +54,29 @@ fetch(BASE_URL + '/get_db_statistic')
         console.error(error);
     });
 
+$(document).ready(function() {
+    $('#build-charts-button').on('click', function() {
+      const startDate = $('#start-date-input').val();
+      const isoDateStr = startDate.toString();
 
-//пример статистиуи бд + json файл
-/*
-let dbStat = {
-    "films": 10,
-    "persons": 20,
-    "staff": 5,
-    "users": 3,
-    "registrations": 2,
-    "logins": 1
-};
+      const isoDate = new Date(isoDateStr);
+      const interval = $('#interval-input').val();
+    $.ajax({
+      type: 'POST',
+      url: BASE_URL + '/get_registrations_statistic',
+      data: JSON.stringify({
+        start_time: isoDateStr,
+        interval_length: interval
+      }),
+      contentType: 'application/json',
 
-// Выводим статистику базы данных на страницу
-document.getElementById('db-size-stat').textContent =
-    `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
+      success: function (response) {
+        const data = response.counts;
+        const labels = data.map((_, index) => {
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
+          return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        });
+        const values = data;
 
         console.log('Labels:', labels);
         console.log('Values:', values);
@@ -75,87 +87,56 @@ document.getElementById('db-size-stat').textContent =
           Chart.getChart('newUsersChart').destroy();
         }
 
-//пример json-а
-/*
-{
-  "start_time": "2023-01-01T00:00:00",
-  "interval_length": 1 //промежуток в часах
-}
-*/
-
-//новые юзеры
-startTime = '2024-07-01T00:00:00';
-intervalLength = 2;
-$(document).ready(function() {
-  $.ajax({
-    type: 'POST',
-    url: BASE_URL + '/get_registrations_statistic',
-    data: JSON.stringify({
-      start_time: startTime,
-      interval_length: intervalLength
-    }),
-    contentType: 'application/json',
-
-    success: function (response) {
-      startTime = new Date(startTime);
-      const data = response.counts;
-      // Создаем массив меток для оси X
-      const labels = data.map((_, index) => {
-        const date = new Date(startTime.getTime() + index * intervalLength * 60 * 60 * 1000);
-        return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-      });
-      
-      // Создаем массив значений для оси Y
-      const values = data;
-
-      const ctx = document.getElementById('newUsersChart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Новые пользователи',
-            data: values,
-            backgroundColor: 'rgb(155,127,243)'
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              type: 'category',
-            },
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Количество пользователей'
+        const chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Новые пользователи',
+              data: values,
+              backgroundColor: 'rgba(155,127,243, 0.5)',
+              borderColor: 'rgba(155,127,243, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: 'category',
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Количество пользователей'
+                }
               }
             }
           }
-        }
-      });
-    },
-    error: function (error) {
-      console.error(error);
-    }
-  });
-});
+        });
+      },
+      error: function (error) {
+        console.error(error);
+      }
+    });
 
-//посещаемость
-/*
-$.ajax({
-  type: 'POST',
-  url: BASE_URL + '/get_logins_statistic',
-  test-data: JSON.stringify({
-    start_time: '2024-07-01T00:00:00',
-    interval_length: 2
-  }),
-  contentType: 'application/json',
-  success: function(response) {
+  //посещаемость
+    $.ajax({
+      type: 'POST',
+      url: BASE_URL + '/get_logins_statistic',
+      data: JSON.stringify({
+        start_time: isoDateStr,
+        interval_length: interval
+      }),
+      contentType: 'application/json',
+      success: function(response) {
+        const data = response.counts;
 
-    const labels = response.map(item => item[0]);
-    const test-data = response.map(item => item[1]);
+        const labels = data.map((_, index) => {
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
+          return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        });
 
         const values = data;
 
@@ -181,19 +162,27 @@ $.ajax({
               fill: false
             }]
           },
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Количество посещений'
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: 'category',
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Количество посещений'
+                }
+              }
             }
           }
-        }
+        });
+      },
+      error: function(error) {
+        console.error(error);
       }
     });
-  },
-  error: function(error) {
-    console.error(error);
-  }
+  });
 });
-*/
+

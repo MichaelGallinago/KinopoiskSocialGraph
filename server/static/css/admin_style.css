@@ -11,9 +11,33 @@
     font-weight: bold;
     text-align: center;
     width: 100%;
-    margin-top: 30px;
-    margin-bottom: 30px;
+    margin-top: 3%;
 }
+
+.admin-stat-filters {
+    padding: 2% 2%;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.admin-stat-filters input {
+    padding: 1% 1%;
+}
+
+#start-date-input{
+    width: 20%;
+    float: left;
+    margin-left: 25%;
+}
+
+#interval-input{
+    width: 20%;
+    float: right;
+    margin-right: 25%;
+}
+
 
 .admin-section {
     display: flex;
@@ -30,14 +54,22 @@
   font-weight: bold;
 }
 
+.admin-section-title-mini{
+    font-family: Roboto, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 0.5%;
+
+}
+
 .admin-section .login-form {
-  font-family: Roboto, sans-serif;
-  font-size: 24px;
+    font-family: Roboto, sans-serif;
+    font-size: 24px;
 }
 
 .admin-section .token-form {
-  font-family: Roboto, sans-serif;
-  font-size: 24px;
+    font-family: Roboto, sans-serif;
+    font-size: 24px;
 }
 
 .admin-form {
@@ -62,7 +94,7 @@
 }
 
 .admin-input {
-    padding: 20px 30px;
+    padding: 3% 3%;
     border: 2px solid transparent;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.5);
@@ -147,8 +179,8 @@
 }
 
 .admin-stat canvas {
-    width: 100%;
-    height: 300px;
+    width: 70%;
+    height: 30%;
 }
 
 .admin-stat-title {
