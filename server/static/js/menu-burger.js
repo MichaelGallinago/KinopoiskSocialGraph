@@ -58,10 +58,12 @@ function openFavourites() {
         deleteGraphFromFavourites(personIdValue, dateValue)
     })*/
 
+    // TODO: пофиксить баг с построением графа
     const favouritesElement = $('.favourites-element')
     $('.favourites-modal').css('display', 'block')
     favouritesElement.on('click', function () {
-        const personIdValue = $(this).find('.favourites-element-name.value').text()
+        alert('После ближайшего обновления можно будет просматривать избранные графы 😜')
+        /*const personIdValue = $(this).find('.favourites-element-name.value').text()
         const dateValue = $(this).find('.favourites-element-date.value').text()
 
         const currentData = data.filter(d => d.personId == personIdValue && d.date == dateValue)
@@ -75,7 +77,7 @@ function openFavourites() {
             },
             personIdValue
         )
-        closeFavourites()
+        closeFavourites()*/
     })
 }
 
