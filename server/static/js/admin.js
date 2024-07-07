@@ -140,7 +140,7 @@ $(document).ready(function() {
 $.ajax({
   type: 'POST',
   url: BASE_URL + '/get_logins_statistic',
-  data: JSON.stringify({
+  test-data: JSON.stringify({
     start_time: '2024-07-01T00:00:00',
     interval_length: 2
   }),
@@ -148,16 +148,16 @@ $.ajax({
   success: function(response) {
 
     const labels = response.map(item => item[0]);
-    const data = response.map(item => item[1]);
+    const test-data = response.map(item => item[1]);
 
     const ctx = document.getElementById('visitsChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'line',
-      data: {
+      test-data: {
         labels: labels,
         datasets: [{
           label: 'Посещения сайта',
-          data: data,
+          test-data: test-data,
           borderColor: 'rgb(101,223,108)',
           fill: false
         }]
