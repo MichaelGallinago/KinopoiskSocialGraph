@@ -80,7 +80,9 @@ $(document).ready(function() {
 
         console.log('Labels:', labels);
         console.log('Values:', values);
-        
+
+        const ctx = document.getElementById('newUsersChart').getContext('2d');
+
         if (Chart.getChart('newUsersChart')) {
           Chart.getChart('newUsersChart').destroy();
         }
@@ -141,8 +143,10 @@ $(document).ready(function() {
         console.log('Labels:', labels);
         console.log('Values:', values);
 
-        if (Chart.getChart('newUsersChart')) {
-          Chart.getChart('newUsersChart').destroy();
+        const ctx = document.getElementById('visitsChart').getContext('2d');
+
+        if (Chart.getChart('visitsChart')) {
+          Chart.getChart('visitsChart').destroy();
         }
 
         const chart = new Chart(ctx, {
