@@ -25,7 +25,7 @@ h1, h2, h3, p, span {
 	font-size: 32px;
 	font-weight: bold;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.1s ease;
 }
 
 .auth-container {
