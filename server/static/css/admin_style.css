@@ -179,8 +179,8 @@
 }
 
 .admin-stat canvas {
-    width: 100%;
-    height: 300px;
+    width: 70%;
+    height: 30%;
 }
 
 .admin-stat-title {

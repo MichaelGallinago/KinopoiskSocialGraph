@@ -54,48 +54,9 @@ fetch(BASE_URL + '/get_db_statistic')
         console.error(error);
     });
 
-//пример статистиуи бд + json файл
-/*
-let dbStat = {
-    "films": 10,
-    "persons": 20,
-    "staff": 5,
-    "users": 3,
-    "registrations": 2,
-    "logins": 1
-};
-
-// Выводим статистику базы данных на страницу
-document.getElementById('db-size-stat').textContent =
-    `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
-
-*/
-
-//новые юзеры
-
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
-      /*
-      console.log(`startDate: ${startDate}`);
-      const datePart = startDate.split('T')[0].split('-');
-      console.log(`datePart: ${datePart}`);
-      const timePart = startDate.split('T')[1] || '00:00';
-      console.log(`timePart: ${timePart}`);
-      const [year, month, day ] = datePart;
-      console.log(`year: ${year}`);
-      console.log(`month: ${month}`);
-      console.log(`Day: ${day}`);
-      const [hour, minute] = timePart.split(':');
-      console.log(`hour: ${hour}`);
-      console.log(`minute: ${minute}`);
-
-      if (datePart.length < 3 || timePart.length < 2) {
-        console.error('Invalid date format');
-        return;
-      }
-      */
-      /*const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;*/
       const isoDateStr = startDate.toString();
 
       const isoDate = new Date(isoDateStr);
@@ -120,8 +81,9 @@ $(document).ready(function() {
         console.log('Labels:', labels);
         console.log('Values:', values);
         
-        const ctx = document.getElementById('newUsersChart').getContext('2d');
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        if (Chart.getChart('newUsersChart')) {
+          Chart.getChart('newUsersChart').destroy();
+        }
 
         const chart = new Chart(ctx, {
           type: 'bar',
@@ -179,8 +141,9 @@ $(document).ready(function() {
         console.log('Labels:', labels);
         console.log('Values:', values);
 
-        const ctx = document.getElementById('visitsChart').getContext('2d');
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        if (Chart.getChart('newUsersChart')) {
+          Chart.getChart('newUsersChart').destroy();
+        }
 
         const chart = new Chart(ctx, {
           type: 'line',
