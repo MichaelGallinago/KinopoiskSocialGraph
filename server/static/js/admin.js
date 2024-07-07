@@ -150,6 +150,7 @@ $(document).ready(function() {
               }
             }
           }
+        });
       },
       error: function (error) {
         console.error(error);
@@ -160,20 +161,20 @@ $(document).ready(function() {
     $.ajax({
       type: 'POST',
       url: BASE_URL + '/get_logins_statistic',
-      test-data: JSON.stringify({
+      data: JSON.stringify({
         start_time: isoDateStr,
         interval_length: interval
       }),
       contentType: 'application/json',
       success: function(response) {
-        const test-data = response.counts;
+        const data = response.counts;
 
         const labels = data.map((_, index) => {
           const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
 
-        const values = test-data;
+        const values = data;
 
         console.log('Labels:', labels);
         console.log('Values:', values);
@@ -183,11 +184,11 @@ $(document).ready(function() {
 
         const chart = new Chart(ctx, {
           type: 'line',
-          test-data: {
+          data: {
             labels: labels,
             datasets: [{
               label: 'Посещения сайта',
-              test-data: values,
+              data: values,
               backgroundColor: 'rgba(255, 99, 132, 0.2)',
               borderColor: 'rgba(255, 99, 132, 1)',
               borderWidth: 1,
