@@ -66,7 +66,14 @@ let dbStat = {
 document.getElementById('db-size-stat').textContent =
     `Фильмы: ${dbStat.films}, Персоны: ${dbStat.persons}, Сотрудники: ${dbStat.staff}, Пользователи: ${dbStat.users}, Регистрации: ${dbStat.registrations}, Входы: ${dbStat.logins}`;
 
-*/
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+
+        const ctx = document.getElementById('newUsersChart').getContext('2d');
+
+        if (Chart.getChart('newUsersChart')) {
+          Chart.getChart('newUsersChart').destroy();
+        }
 
 //пример json-а
 /*
@@ -150,26 +157,29 @@ $.ajax({
     const labels = response.map(item => item[0]);
     const test-data = response.map(item => item[1]);
 
-    const ctx = document.getElementById('visitsChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      test-data: {
-        labels: labels,
-        datasets: [{
-          label: 'Посещения сайта',
-          test-data: test-data,
-          borderColor: 'rgb(101,223,108)',
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'day'
-            }
+        const values = data;
+
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+
+        const ctx = document.getElementById('visitsChart').getContext('2d');
+
+        if (Chart.getChart('visitsChart')) {
+          Chart.getChart('visitsChart').destroy();
+        }
+
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Посещения сайта',
+              data: values,
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1,
+              fill: false
+            }]
           },
           y: {
             beginAtZero: true,
