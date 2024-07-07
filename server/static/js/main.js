@@ -1,18 +1,4 @@
-class User {
-    constructor(options) {
-        this.login = options.login
-        this.email = options.email != null ? options.email : ''
-        this.password = options.password
-    }
 
-    static fillTokens(data) {
-        $('.tokens-value').text(data.tokens)
-        if (data.tokens == 0) {
-            $('.load-graph-btn').attr('disabled', 'disabled')
-            alert('У вас закончились токены для загрузки графа!')
-        }
-    }
-}
 
 $(document).ready(function () {
     const loginModal = obj.modal({
