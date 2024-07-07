@@ -76,7 +76,8 @@ document.getElementById('db-size-stat').textContent =
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
-      const [datePart, timePart] = startDate.split(' ');
+      const datePart = startDate.replace(/,/g, '').split('.');
+      const timePart = startDate.split(' ')[1] || '00:00';
       const [day, month, year] = datePart.split('.');
       const [hour, minute] = timePart.split(':');
       const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
