@@ -76,32 +76,30 @@ document.getElementById('db-size-stat').textContent =
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
-            console.log(`startDate: ${startDate}`);
-      const dateAndTimePart = startDate.split(' ')[0];
-            console.log(`dateAndTimePart: ${dateAndTimePart}`);
-      const datePart = dateAndTimePart.replace(/,/g, '').split('.');
-            console.log(`datePart: ${datePart}`);
-      const timePart = startDate.split(' ')[1] || '00:00';
-            console.log(`timePart: ${timePart}`);
-      const [day, month, year] = datePart;
-            console.log(`day: ${day}`);
-            console.log(`month: ${month}`);
-            console.log(`year: ${year}`);
+      console.log(`startDate: ${startDate}`);
+      const datePart = startDate.split('T')[0].split('-');
+      console.log(`datePart: ${datePart}`);
+      const timePart = startDate.split('T')[1] || '00:00';
+      console.log(`timePart: ${timePart}`);
+      const [year, month, day ] = datePart;
+      console.log(`year: ${year}`);
+      console.log(`month: ${month}`);
+      console.log(`Day: ${day}`);
       const [hour, minute] = timePart.split(':');
-            console.log(`hour: ${hour}`);
-            console.log(`minute: ${minute}`);
-            
+      console.log(`hour: ${hour}`);
+      console.log(`minute: ${minute}`);
+
       if (datePart.length < 3 || timePart.length < 2) {
         console.error('Invalid date format');
         return;
       }
       const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-      console.log(`Day: ${day}`);
-      console.log(`Month: ${month}`);
-      console.log(`Year: ${year}`);
-      console.log(`Hour: ${hour}`);
-      console.log(`Minute: ${minute}`);
-      console.log(`ISO Date: ${isoDate}`);
+        console.log(`Day: ${day}`);
+        console.log(`Month: ${month}`);
+        console.log(`Year: ${year}`);
+        console.log(`Hour: ${hour}`);
+        console.log(`Minute: ${minute}`);
+        console.log(`ISO Date: ${isoDate}`);
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
