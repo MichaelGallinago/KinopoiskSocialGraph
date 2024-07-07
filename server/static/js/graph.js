@@ -99,9 +99,9 @@ async function loadGraph(personId) {
 
     /*fetch('http://localhost:8080/js/data/test-graph-1.json')
         .then(response => response.json())
-        .then(data => {
-            saveSearchToHistory(data)
-            drawGraph(data, personId)
+        .then(test-data => {
+            saveSearchToHistory(test-data)
+            drawGraph(test-data, personId)
         })
         .catch(error => console.error('Ошибка получения данных:', error));*/
 }
@@ -191,14 +191,13 @@ function drawGraph(data, personId) {
     });
 
     const zoom = d3.zoom()
-        .scaleExtent([1, 10]) // Устанавливаем пределы масштабирования
-        //.translateExtent([[0, 0], [width, height]]) // Устанавливаем пределы перемещения
-        .extent([[0, 0], [width, height]]) // Устанавливаем область видимости
+        .scaleExtent([1, 10])
+        .extent([[0, 0], [width, height]])
         .on("zoom", function (event) {
             svg.attr("transform", event.transform);
-        }); // Добавляем обработчик события зума
+        });
 
-    svg.call(zoom); // Применяем функцию зума к SVG
+    svg.call(zoom);
 
     function dragstarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -253,9 +252,9 @@ async function getPersonInfo(personId) {
 
     /*fetch('http://localhost:8080/js/data/test-person-1.json')
         .then(response => response.json())
-        .then(data => {
+        .then(test-data => {
             clearPersonInfo()
-            fillPersonInfo(data)
+            fillPersonInfo(test-data)
         })
         .catch(error => console.error('Ошибка получения данных:', error));*/
 }
