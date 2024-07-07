@@ -180,7 +180,7 @@ def get_registrations_statistic():
         return jsonify({"error": "Invalid input"}), 400
 
     start_time = datetime.datetime.fromisoformat(data["start_time"])
-    interval = timedelta(hours=data["interval_length"])
+    interval = timedelta(hours=float(data["interval_length"]))
 
     test = db.count_registrations(start_time, interval)
     print(test)
