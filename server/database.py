@@ -410,7 +410,7 @@ class Database:
     def set_token(self, login, value):
         self.__users.update_one(
             {"login": login},
-            {"$set": {"tokens": value}})
+            {"set": {"tokens": value}})
 
     def get_statistics(self):
         return {

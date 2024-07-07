@@ -1,147 +1,353 @@
-class Graph {
-    #personId
-    #data
-    #filters
+const BASE_URL = "http://192.168.0.85:5000"
 
-    constructor(options) {
-        this.#personId = options.personId
-        this.#data = options.data
-        this.#filters = options.filters
-    }
+document.getElementById('graph-form').addEventListener('submit', async function (event) {
+    event.preventDefault()
 
-    static get getData() {
-        return {
-            personId: this.#personId,
-            data: this.#data,
-            filters: this.#filters,
-        }
-    }
+    const personId = document.getElementById('person-id').value
+    
+    await loadGraph(personId)
+})
 
-    drawGraph() {
-        Person.clearInfo()
-        $('#graph').empty()
+let graphData = null
 
-        const graphContainer = $('#graph-container')
-        const containerWidth = graphContainer.clientWidth
-        const containerHeight = graphContainer.clientHeight
+$(document).ready(function () {
+    getTokens()
+})
 
-        const svg = d3.select("svg")
-        let width = containerWidth
-        let height = containerHeight
+$('.depth-input').on('input', function() {
+    $('#depth-text').text(this.value)
+}).trigger('input')
 
-        let centerX = width / 2
-        let centerY = height / 2
+$('.people-limit-input').on('input', function () {
+    $('.people-limit-text').text(this.value)
+}).trigger('input')
 
-        const maxCommonMovies = this.#data.edges.reduce((maxCount, edge) => {
-            const filmCount = Array.isArray(edge.movie) ? edge.movie.length : 1
-            return Math.max(maxCount, filmCount)
-        }, 0)
+$('.movie-limit-for-person-input').on('input', function () {
+    $('.movie-limit-for-person-text').text(this.value)
+}).trigger('input')
 
-        const simulation = d3.forceSimulation(this.#data.nodes)
-            .force("link", d3.forceLink(this.#data.edges).id(d => d.id).distance(d => {
-                let commonMovies = 0
-                data.edges.forEach(edge => {
-                    if ((edge.source.id === d.source.id && edge.target.id === d.target.id) ||
-                        (edge.source.id === d.target.id && edge.target.id === d.source.id)) {
-                        commonMovies += Array.isArray(edge.movie) ? edge.movie[0] : 1
-                    }
-                })
-                return (maxCommonMovies * 5) / commonMovies
-            }))
-            .force('center', d3.forceCenter(centerX, centerY))
-            .force("repulsion", d3.forceManyBody().strength(-maxCommonMovies))
+$('.movie-min-for-edge-input').on('input', function () {
+    $('.movie-min-for-edge-text').text(this.value)
+}).trigger('input')
 
-        const link = svg.selectAll(".link")
-            .data(this.#data.edges)
-            .enter().append("line")
-            .attr("class", "link")
+$('.age-input-left-range').on('input', function() {
+    $('#left-age-text').text(this.value)
+}).trigger('input')
 
-        link.append('title')
-            .text(d => d.movie.join('\n'))
+$('.age-input-right-range').on('input', function() {
+    $('#right-age-text').text(this.value)
+}).trigger('input')
 
-        const node = svg.selectAll(".node")
-            .data(this.#data.nodes)
-            .enter().append("circle")
-            .attr("class", "node")
-            .attr("r", 8)
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended))
-            .on("click", async function(event, d) {
-                await API.getPersonInfo(d.id)
+$('.height-input-left-range').on('input', function() {
+    $('#left-height-text').text(this.value)
+}).trigger('input')
+
+$('.height-input-right-range').on('input', function() {
+    $('#right-height-text').text(this.value)
+}).trigger('input')
+
+$('.awards-input').on('input', function () {
+    $('#awards-text').text(this.value)
+}).trigger('input')
+
+$('.movies-input').on('input', function () {
+    $('#movies-text').text(this.value)
+}).trigger('input')
+
+async function loadGraph(personId) {
+    try {
+        showLoader()
+        const response = await fetch(BASE_URL + '/make_graph', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: localStorage.getItem('login'),
+                password: localStorage.getItem('password'),
+                personId: personId,
+                depth: $('.depth-input').val(),
+                peopleLimit: $('.people-limit-input').val(),
+                movieLimitForPerson: $('.movie-limit-for-person-input').val(),
+                movieMinForEdge: $('.movie-min-for-edge-input').val(),
+                ageLeft: $('.age-input-left-range').val(),
+                ageRight: $('.age-input-right-range').val(),
+                isAlive: $('.is-alive-input').val(),
+                heightLeft: $('.height-input-left-range').val(),
+                heightRight: $('.height-input-right-range').val(),
+                awards: $('.awards-input').val(),
+                career: $('.career-input').val(),
+                gender: $('.gender-input').val(),
+                countOfMovies: $('.movies-input').val()
             })
-
-        node.append("title")
-            .text(d => d.name)
-
-        const personNode = d3.selectAll('.node').filter((d) => {
-            return d.id === parseInt(this.#personId)
-        })
-        personNode.attr('class', 'person-node')
-
-        simulation.on("tick", () => {
-            link
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y)
-
-            node
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y)
         })
 
-        const zoom = d3.zoom()
-            .scaleExtent([1, 10])
-            .extent([[0, 0], [width, height]])
-            .on("zoom", function (event) {
-                svg.attr("transform", event.transform)
+        if (response.ok) {
+            const data  = await response.json()
+            saveSearchToHistory(data)
+            drawGraph(data, personId)
+            getTokens()
+            hideLoader()
+        } else {
+            hideLoader()
+            alert('Ошибка при загрузке графа: ' + response.status)
+        }
+    } catch (error) {
+        hideLoader()
+        alert('Произошла ошибка: ' + error)
+    }
+
+    /*fetch('http://localhost:8080/js/data/test-graph-1.json')
+        .then(response => response.json())
+        .then(test-data => {
+            saveSearchToHistory(test-data)
+            drawGraph(test-data, personId)
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
+}
+
+function drawGraph(data, personId) {
+    clearPersonInfo()
+    document.getElementById('graph').innerHTML = ''
+
+    graphData = data
+
+    const graphContainer = document.getElementById('graph-container');
+    const containerWidth = graphContainer.clientWidth;
+    const containerHeight = graphContainer.clientHeight;
+
+    const svg = d3.select("svg");
+    let width = +svg.attr("width");
+    let height = +svg.attr("height");
+
+    if (width === 0 && height === 0) {
+        width = containerWidth;
+        height = containerHeight;
+    } else if (width === '100%' || height === '100%') {
+        throw new Error('Недопустимые значения ширины или высоты SVG');
+    }
+
+    let centerX = width / 2;
+    let centerY = height / 2;
+
+    const maxCommonMovies = data.edges.reduce((maxCount, edge) => {
+        const filmCount = Array.isArray(edge.movie) ? edge.movie.length : 1;
+        return Math.max(maxCount, filmCount);
+    }, 0);
+
+    const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.edges).id(d => d.id).distance(d => {
+            let commonMovies = 0;
+            data.edges.forEach(edge => {
+                if ((edge.source.id === d.source.id && edge.target.id === d.target.id) ||
+                    (edge.source.id === d.target.id && edge.target.id === d.source.id)) {
+                    commonMovies += Array.isArray(edge.movie) ? edge.movie[0] : 1;
+                }
+            });
+            return (maxCommonMovies * 5) / commonMovies;
+        }))
+        .force('center', d3.forceCenter(centerX, centerY))
+        .force("repulsion", d3.forceManyBody().strength(-maxCommonMovies));
+
+    const link = svg.selectAll(".link")
+        .data(data.edges)
+        .enter().append("line")
+        .attr("class", "link");
+
+    link.append('title')
+        .text(d => d.movie.join('\n'))
+
+    const node = svg.selectAll(".node")
+        .data(data.nodes)
+        .enter().append("circle")
+        .attr("class", "node")
+        .attr("r", 8)
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended))
+        .on("click", function(event, d) {
+            getPersonInfo(d.id)
+        })
+
+    node.append("title")
+        .text(d => d.name);
+
+    const personNode = d3.selectAll('.node').filter((d) => {
+        return d.id === parseInt(personId)
+    })
+    personNode.attr('class', 'person-node')
+
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+    });
+
+    const zoom = d3.zoom()
+        .scaleExtent([1, 10])
+        .extent([[0, 0], [width, height]])
+        .on("zoom", function (event) {
+            svg.attr("transform", event.transform);
+        });
+
+    svg.call(zoom);
+
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+    checkFavouritesHasGraph(personId)
+}
+
+function showLoader() {
+    document.querySelector('.loader').classList.remove('loader-hidden')
+}
+
+function hideLoader() {
+    document.querySelector('.loader').classList.add('loader-hidden')
+}
+
+async function getPersonInfo(personId) {
+    try {
+        const response = await fetch(BASE_URL + '/get_person', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                personId: personId
             })
-        svg.call(zoom)
+        })
 
-        function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
-            d.fx = d.x
-            d.fy = d.y
+        if (response.ok) {
+            const data = await response.json()
+            clearPersonInfo()
+            fillPersonInfo(data)
+        } else {
+            alert('Ошибка при загрузке данных о персоне: ' + response.status)
         }
-
-        function dragged(event, d) {
-            d.fx = event.x
-            d.fy = event.y
-        }
-
-        function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0)
-            d.fx = null
-            d.fy = null
-        }
-
-        LocalStorage.checkFavouritesHasGraph(this.#personId)
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
     }
 
-    static showLoader() {
-        $('.loader').removeClass('loader-hidden')
-    }
+    /*fetch('http://localhost:8080/js/data/test-person-1.json')
+        .then(response => response.json())
+        .then(test-data => {
+            clearPersonInfo()
+            fillPersonInfo(test-data)
+        })
+        .catch(error => console.error('Ошибка получения данных:', error));*/
+}
 
-    static hideLoader() {
-        $('.loader').addClass('loader-hidden')
+function fillPersonInfo(data) {
+    const personPhoto = $('.person-photo')
+    const personName = $('.person-name')
+    const personInfoMain = $('.person-info-main')
+    const personInfoMore = $('.person-info-more')
+
+    personPhoto.attr('src', data.posterUrl)
+    let temp = [data.nameRu, data.nameEn].filter((d) => d != null && d != 'None' && d != '')
+    personName.text(temp.join(' - '))
+
+    personInfoMain.find('.info-elements').append(
+        createInfo('Возраст', data.age),
+        createInfo('Пол', data.sex == 'MALE' ? 'Мужской' : 'Женский'),
+        createInfo('Место рождения', data.birthplace),
+        createInfo('Кол-во фильмов', data.films),
+        createInfo('Кол-во наград', data.hasAwards)
+    )
+
+    personInfoMore.find('.info-elements').append(
+        createInfo('ID', data.personId),
+        createInfo('Профессия', data.profession),
+        createInfo('Дата рождения', formatDate(data.birthday)),
+        createInfo('Рост (см)', data.growth),
+        createInfo('Супруги', data.spouses),
+        createInfo('Умер', data.death == null || data.death == 'None' ? 'SKIP' : formatDate(data.death)),
+        createInfo('Место смерти', data.deathplace == null || data.deathplace == 'None' ? 'SKIP' : data.deathplace),
+        createInfo('Ссылка', `<a href="${data.webUrl}" target="_blank">${data.webUrl}</a>`)
+    )
+
+    function createInfo(key, value) {
+        if (value !== 'SKIP') {
+            return $(`
+                <div class="info">
+                    <span class="key">${key}</span>
+                    <span class="info-value">${value}</span>
+                </div>
+            `)
+        }
     }
 }
 
-class Filter {
-    #options
+function formatDate(dateString) {
+    const parts = dateString.split('-');
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
 
-    constructor(options) {
-        this.#options = options
+function clearPersonInfo() {
+    $('.person-photo').attr('src', '')
+    $('.person-name').text('')
+    $('.info-elements').empty()
+}
+
+async function getTokens() {
+    try {
+        const response = await fetch(BASE_URL + '/get_tokens', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: localStorage.getItem('login')
+            })
+        })
+
+        if (response.ok) {
+            const data = await response.json()
+            fillTokens(data)
+        } else {
+            alert('Ошибка при загрузке данных о персоне: ' + response.status)
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
     }
+}
 
-    get getOptions() {
-        return this.#options
+function fillTokens(data) {
+    $('.tokens-value').text(data.tokens)
+    if (data.tokens == 0) {
+        $('.load-graph-btn').attr('disabled', 'disabled')
+        alert('У вас закончились токены для загрузки графа!')
     }
+}
 
-    static getFilters() {
-        return {
+function saveSearchToHistory(data) {
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || []
+
+    searchHistory.push({
+        personId: $('.person-id-input').val(),
+        filters: {
             depth: $('.depth-input').val(),
             peopleLimit: $('.people-limit-input').val(),
             movieLimitForPerson: $('.movie-limit-for-person-input').val(),
@@ -155,122 +361,86 @@ class Filter {
             career: $('.career-input').val(),
             gender: $('.gender-input').val(),
             countOfMovies: $('.movies-input').val()
-        }
-    }
-
-    static formatDate(dateString) {
-        const parts = dateString.split('-')
-        return `${parts[2]}.${parts[1]}.${parts[0]}`
-    }
-}
-
-class Person {
-    #options
-
-    constructor(options) {
-        this.#options = options
-    }
-
-    get getOptions() {
-        return this.#options
-    }
-
-    fillInfo() {
-        const personPhoto = $('.person-photo')
-        const personName = $('.person-name')
-        const personInfoMain = $('.person-info-main')
-        const personInfoMore = $('.person-info-more')
-
-        personPhoto.attr('src', this.#options.posterUrl)
-        let temp = [this.#options.nameRu, this.#options.nameEn].filter((d) => d != null && d != 'None' && d != '')
-        personName.text(temp.join(' - '))
-
-        personInfoMain.find('.info-elements').append(
-            createInfo('Возраст', this.#options.age),
-            createInfo('Пол', this.#options.sex == 'MALE' ? 'Мужской' : 'Женский'),
-            createInfo('Место рождения', this.#options.birthplace),
-            createInfo('Кол-во фильмов', this.#options.films),
-            createInfo('Кол-во наград', this.#options.hasAwards)
-        )
-
-        personInfoMore.find('.info-elements').append(
-            createInfo('ID', this.#options.personId),
-            createInfo('Профессия', this.#options.profession),
-            createInfo('Дата рождения', Filter.formatDate(this.#options.birthday)),
-            createInfo('Рост (см)', this.#options.growth),
-            createInfo('Супруги', this.#options.spouses),
-            createInfo('Умер', this.#options.death == null || this.#options.death == 'None' ? 'SKIP' : Filter.formatDate(this.#options.death)),
-            createInfo('Место смерти', this.#options.deathplace == null || this.#options.deathplace == 'None' ? 'SKIP' : this.#options.deathplace),
-            createInfo('Ссылка', `<a href="${this.#options.webUrl}" target="_blank">${this.#options.webUrl}</a>`)
-        )
-
-        function createInfo(key, value) {
-            if (value !== 'SKIP') {
-                return $(`
-                <div class="info">
-                    <span class="key">${key}</span>
-                    <span class="info-value">${value}</span>
-                </div>
-            `)
-            }
-        }
-    }
-
-    static clearInfo() {
-        $('.person-photo').attr('src', '')
-        $('.person-name').text('')
-        $('.info-elements').empty()
-    }
-}
-
-$(document).ready(async function () {
-    await API.getTokens()
-
-    $('#graph-form').on('submit', async function (event) {
-        event.preventDefault()
-
-        const personId = document.getElementById('person-id').value
-
-        await API.loadGraph(personId)
+        },
+        edges: data.edges,
+        nodes: data.nodes,
+        date: new Date().toLocaleString('ru', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        })
     })
 
-    $('.depth-input').on('input', function() {
-        $('#depth-text').text(this.value)
-    }).trigger('input')
+    localStorage.setItem('searchHistory', JSON.stringify(searchHistory))
+}
 
-    $('.people-limit-input').on('input', function () {
-        $('.people-limit-text').text(this.value)
-    }).trigger('input')
+function saveGraphToFavourites() {
+    let favourites = JSON.parse(localStorage.getItem('favourites')) || []
+    const personId = $('.person-id-input').val()
 
-    $('.movie-limit-for-person-input').on('input', function () {
-        $('.movie-limit-for-person-text').text(this.value)
-    }).trigger('input')
+    const searchHistory = JSON.parse(localStorage.getItem('searchHistory'))
+    const filters = getFilters()
+    const temp = searchHistory.filter(d => d.personId === personId && JSON.stringify(d.filters) === JSON.stringify(filters))
 
-    $('.movie-min-for-edge-input').on('input', function () {
-        $('.movie-min-for-edge-text').text(this.value)
-    }).trigger('input')
+    const date = temp == null || temp.length === 0 ? null : temp[0].date
 
-    $('.age-input-left-range').on('input', function() {
-        $('#left-age-text').text(this.value)
-    }).trigger('input')
+    if (date != null) {
+        favourites.push({
+            personId: personId,
+            filters: getFilters(),
+            edges: graphData.edges,
+            nodes: graphData.nodes,
+            date: date
+        })
 
-    $('.age-input-right-range').on('input', function() {
-        $('#right-age-text').text(this.value)
-    }).trigger('input')
+        localStorage.setItem('favourites', JSON.stringify(favourites))
+        disableSaveToFavouritesBtn()
+    }
+}
 
-    $('.height-input-left-range').on('input', function() {
-        $('#left-height-text').text(this.value)
-    }).trigger('input')
+function checkFavouritesHasGraph(personId) {
+    const favourites = JSON.parse(localStorage.getItem('favourites'))
 
-    $('.height-input-right-range').on('input', function() {
-        $('#right-height-text').text(this.value)
-    }).trigger('input')
+    const filters = getFilters()
 
-    $('.awards-input').on('input', function () {
-        $('#awards-text').text(this.value)
-    }).trigger('input')
+    if (favourites != null) {
+        const temp = favourites.filter(d => d.personId === personId && JSON.stringify(d.filters) == JSON.stringify(filters))
 
-    $('.movies-input').on('input', function () {
-        $('#movies-text').text(this.value)
-    }).trigger('input')
-})
+        temp == null || temp.length === 0 ? enableSaveToFavouritesBtn() : disableSaveToFavouritesBtn()
+    } else {
+        enableSaveToFavouritesBtn()
+    }
+}
+
+function getFilters() {
+    return filters = {
+        depth: $('.depth-input').val(),
+        peopleLimit: $('.people-limit-input').val(),
+        movieLimitForPerson: $('.movie-limit-for-person-input').val(),
+        movieMinForEdge: $('.movie-min-for-edge-input').val(),
+        ageLeft: $('.age-input-left-range').val(),
+        ageRight: $('.age-input-right-range').val(),
+        isAlive: $('.is-alive-input').val(),
+        heightLeft: $('.height-input-left-range').val(),
+        heightRight: $('.height-input-right-range').val(),
+        awards: $('.awards-input').val(),
+        career: $('.career-input').val(),
+        gender: $('.gender-input').val(),
+        countOfMovies: $('.movies-input').val()
+    }
+}
+
+/*function deleteGraphFromFavourites(personId, date) {
+    let favourites = JSON.parse(localStorage.getItem('favourites'))
+
+    console.log(favourites.length)
+    favourites.filter(d => {
+        d.personId != personId && d.date != date
+    })
+
+    console.log(favourites.length)
+    localStorage.setItem('favourites', JSON.stringify(favourites))
+}*/

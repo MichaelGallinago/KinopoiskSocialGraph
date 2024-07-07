@@ -180,9 +180,11 @@ def get_registrations_statistic():
         return jsonify({"error": "Invalid input"}), 400
 
     start_time = datetime.datetime.fromisoformat(data["start_time"])
-    interval = timedelta(hours=float(data["interval_length"]))
+    interval = timedelta(hours=data["interval_length"])
 
-    return db.count_registrations(start_time, interval), 200
+    test = db.count_registrations(start_time, interval)
+    print(test)
+    return test, 200
 
 
 def generate_graph_stream(graph):

@@ -1,67 +1,79 @@
-class User {
-    constructor(options) {
-        this.login = options.login
-        this.email = options.email != null ? options.email : ''
-        this.password = options.password
-    }
+const BASE_URL = "http://192.168.0.85:5000"
 
-    static fillTokens(data) {
-        $('.tokens-value').text(data.tokens)
-        if (data.tokens == 0) {
-            $('.load-graph-btn').attr('disabled', 'disabled')
-            alert('У вас закончились токены для загрузки графа!')
+const loginModal = $.modal()
+const openLoginWindow = document.querySelector('.open-login-window-btn')
+openLoginWindow.addEventListener('click', event => {
+    loginModal.open()
+})
+
+document.getElementById('register-form').addEventListener('submit', async function (event) {
+    event.preventDefault()
+
+    const login = document.querySelector('.register-login-input').value
+    const email = document.querySelector('.register-email-input').value
+    const password = document.querySelector('.register-password-input').value
+
+    await register(login, email, password)
+})
+
+document.getElementById('login-form').addEventListener('submit', async function  (event) {
+    event.preventDefault()
+
+    const login = document.querySelector('.login-input').value
+    const password = document.querySelector('.password-input').value
+
+    await auth(login, password)
+})
+
+async function register(login, email, password) {
+    try {
+        const response = await fetch(BASE_URL + '/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: login,
+                email: email,
+                password: password
+            })
+        })
+
+        if (response.ok) {
+            alert('Регистрация прошла успешно!')
+            localStorage.setItem('login', login)
+            localStorage.setItem('password', password)
+            window.location.href = 'graph.html'
+        } else {
+            alert('Ошибка регистрации: ' + response.status)
         }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
     }
 }
 
-$(document).ready(function () {
-    const loginModal = obj.modal({
-        class: 'login-modal modal-window',
-        content: `
-        <div class="modal-overlay" data-close="true">
-            <div class="auth-modal-window">
-                <img src="../static/img/close-icon.png" alt="close-icon" class="close-icon" data-close="true">
-                <h2 class="login-title">Вход</h2>
-                <form id="login-form" class="login-form auth-container">
-                    <div class="auth-field">
-                        <img src="../static/img/login-icon.png" alt="login-icon" class="login-icon auth-icon">
-                        <input type="text" name="login" class="login-input auth-input" required placeholder="Логин" />
-                    </div>
-                    <div class="auth-field">
-                        <img src="../static/img/password-icon.png" alt="password-icon" class="password-icon auth-icon">
-                        <input type="password" name="password" class="password-input auth-input" required placeholder="Пароль" />
-                    </div>
-                    <button type="submit" class="login-button glowing-button">Войти</button>
-                </form>
-            </div>
-        </div>
-    `
-    })
-
-    let user = null
-
-    $('.open-login-window-btn').on('click', function () { loginModal.open() })
-
-    $('.register-form').on('submit', async function (event) {
-        event.preventDefault()
-
-        user = new User({
-            login: '4324234',
-            email: $('.register-email-input').val(),
-            password: $('.register-password-input').val()
+async function auth(login, password) {
+    try {
+        const response = await fetch(BASE_URL + '/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: login,
+                password: password
+            })
         })
 
-        await API.register(user.login, user.email, user.password)
-    })
-
-    $('.login-form').on('submit', async function (event) {
-        event.preventDefault()
-
-        user = new User({
-            login: $('.login-input').val(),
-            password: $('.password-input').val()
-        })
-
-        await API.auth(user.login, user.password)
-    })
-})
+        if (response.ok) {
+            const data = await response.json()
+            localStorage.setItem('login', login)
+            localStorage.setItem('password', password)
+            window.location.href = 'graph.html'
+        } else {
+            alert('Ошибка авторизации: ' + response.status)
+        }
+    } catch (error) {
+        alert('Произошла ошибка: ' + error)
+    }
+}
