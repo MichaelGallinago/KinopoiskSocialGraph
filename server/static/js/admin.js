@@ -80,8 +80,18 @@ $(document).ready(function() {
       const timePart = startDate.split(' ')[1] || '00:00';
       const [day, month, year] = datePart;
       const [hour, minute] = timePart.split(':');
-      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
 
+      if (datePart.length < 3 || timePart.length < 2) {
+        console.error('Invalid date format');
+        return;
+      }
+      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+      console.log(`Day: ${day}`);
+      console.log(`Month: ${month}`);
+      console.log(`Year: ${year}`);
+      console.log(`Hour: ${hour}`);
+      console.log(`Minute: ${minute}`);
+      console.log(`ISO Date: ${isoDate}`);
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
