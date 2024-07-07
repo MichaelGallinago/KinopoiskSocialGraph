@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.0.85:5000"
+const BASE_URL = "http://172.29.233.230:5000"
 
 //токены
 $(document).ready(() => {

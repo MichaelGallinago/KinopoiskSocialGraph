@@ -1,17 +1,18 @@
 ﻿import datetime
+import json
 from datetime import timedelta
-from waitress import serve
+from gunicorn.app.base import BaseApplication
 
-from database import Database
+import validate_email
 from flask import Flask, request, jsonify, Response, stream_with_context, redirect, url_for, render_template
 from flask_cors import CORS
 from flask_pymongo import PyMongo
 from werkzeug.security import check_password_hash
-from email_validator import validate_email, EmailNotValidError
-import json
+
+from database import Database
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.config["MONGO_URI"] = "mongodb://localhost:27017/ksg"
+app.config["MONGO_URI"] = "mongodb://192.168.0.24:27017/ksg"
 db = Database(PyMongo(app).db)
 CORS(app)
 
@@ -54,12 +55,10 @@ def register():
     if not login or not email or not password:
         return jsonify({"error": "Fields cannot be empty"}), 400
 
-    try:
-        validate_email(email)
-    except EmailNotValidError:
-        return jsonify({"error": "Invalid email"}), 400
+    if validate_email.validate_email(email):
+        return db.register_user(login, email, password)
 
-    return db.register_user(login, email, password)
+    return jsonify({"error": "Invalid email"}), 400
 
 
 @app.route('/login', methods=['POST'])
@@ -205,5 +204,5 @@ def generate_graph_stream(graph):
 
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port=5000, debug=True)
-    serve(app, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+    # serve(app, host='0.0.0.0', port=5000)
