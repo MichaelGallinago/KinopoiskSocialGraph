@@ -76,6 +76,7 @@ document.getElementById('db-size-stat').textContent =
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
+      /*
       console.log(`startDate: ${startDate}`);
       const datePart = startDate.split('T')[0].split('-');
       console.log(`datePart: ${datePart}`);
@@ -93,19 +94,17 @@ $(document).ready(function() {
         console.error('Invalid date format');
         return;
       }
-      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-        console.log(`Day: ${day}`);
-        console.log(`Month: ${month}`);
-        console.log(`Year: ${year}`);
-        console.log(`Hour: ${hour}`);
-        console.log(`Minute: ${minute}`);
-        console.log(`ISO Date: ${isoDate}`);
+      */
+      /*const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;*/
+      const isoDateStr = startDate.toString();
+
+      const isoDate = new Date(isoDateStr);
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
       url: BASE_URL + '/get_registrations_statistic',
       data: JSON.stringify({
-        start_time: isoDate,
+        start_time: isoDateStr,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -113,7 +112,7 @@ $(document).ready(function() {
       success: function (response) {
         const data = response.counts;
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * interval * 60 * 60 * 1000);
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
         const values = data;
