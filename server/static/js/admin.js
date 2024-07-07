@@ -75,13 +75,18 @@ document.getElementById('db-size-stat').textContent =
 
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
-      const startDate = new Date($('#start-date-input').val());
+      const startDate = $('#start-date-input').val();
+      const [datePart, timePart] = startDate.split(' ');
+      const [day, month, year] = datePart.split('.');
+      const [hour, minute] = timePart.split(':');
+      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
       url: BASE_URL + '/get_registrations_statistic',
       data: JSON.stringify({
-        start_time: startDate,
+        start_time: isoDate,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -89,7 +94,7 @@ $(document).ready(function() {
       success: function (response) {
         const data = response.counts;
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * intervalLength * 60 * 60 * 1000);
+          const date = new Date(startDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
         const values = data;
@@ -134,7 +139,7 @@ $(document).ready(function() {
       type: 'POST',
       url: BASE_URL + '/get_logins_statistic',
       data: JSON.stringify({
-        start_time: startDate,
+        start_time: isoDate,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -142,7 +147,7 @@ $(document).ready(function() {
         const data = response.counts;
 
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * intervalLength * 60 * 60 * 1000);
+          const date = new Date(startDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
 
