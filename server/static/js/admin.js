@@ -76,12 +76,35 @@ document.getElementById('db-size-stat').textContent =
 $(document).ready(function() {
     $('#build-charts-button').on('click', function() {
       const startDate = $('#start-date-input').val();
+      /*
+      console.log(`startDate: ${startDate}`);
+      const datePart = startDate.split('T')[0].split('-');
+      console.log(`datePart: ${datePart}`);
+      const timePart = startDate.split('T')[1] || '00:00';
+      console.log(`timePart: ${timePart}`);
+      const [year, month, day ] = datePart;
+      console.log(`year: ${year}`);
+      console.log(`month: ${month}`);
+      console.log(`Day: ${day}`);
+      const [hour, minute] = timePart.split(':');
+      console.log(`hour: ${hour}`);
+      console.log(`minute: ${minute}`);
+
+      if (datePart.length < 3 || timePart.length < 2) {
+        console.error('Invalid date format');
+        return;
+      }
+      */
+      /*const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;*/
+      const isoDateStr = startDate.toString();
+
+      const isoDate = new Date(isoDateStr);
       const interval = $('#interval-input').val();
     $.ajax({
       type: 'POST',
       url: BASE_URL + '/get_registrations_statistic',
       data: JSON.stringify({
-        start_time: startDate,
+        start_time: isoDateStr,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -89,12 +112,17 @@ $(document).ready(function() {
       success: function (response) {
         const data = response.counts;
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * intervalLength * 60 * 60 * 1000);
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
         const values = data;
 
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+        
         const ctx = document.getElementById('newUsersChart').getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         const chart = new Chart(ctx, {
           type: 'bar',
           data: {
@@ -134,7 +162,7 @@ $(document).ready(function() {
       type: 'POST',
       url: BASE_URL + '/get_logins_statistic',
       data: JSON.stringify({
-        start_time: startDate,
+        start_time: isoDateStr,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -142,13 +170,18 @@ $(document).ready(function() {
         const data = response.counts;
 
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * intervalLength * 60 * 60 * 1000);
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
 
         const values = data;
 
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+
         const ctx = document.getElementById('visitsChart').getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         const chart = new Chart(ctx, {
           type: 'line',
           data: {
