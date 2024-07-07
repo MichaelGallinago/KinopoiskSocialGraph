@@ -117,7 +117,12 @@ $(document).ready(function() {
         });
         const values = data;
 
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+        
         const ctx = document.getElementById('newUsersChart').getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         const chart = new Chart(ctx, {
           type: 'bar',
           data: {
@@ -157,7 +162,7 @@ $(document).ready(function() {
       type: 'POST',
       url: BASE_URL + '/get_logins_statistic',
       data: JSON.stringify({
-        start_time: isoDate,
+        start_time: isoDateStr,
         interval_length: interval
       }),
       contentType: 'application/json',
@@ -165,13 +170,18 @@ $(document).ready(function() {
         const data = response.counts;
 
         const labels = data.map((_, index) => {
-          const date = new Date(startDate.getTime() + index * interval * 60 * 60 * 1000);
+          const date = new Date(isoDate.getTime() + index * interval * 60 * 60 * 1000);
           return date.toLocaleTimeString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         });
 
         const values = data;
 
+        console.log('Labels:', labels);
+        console.log('Values:', values);
+
         const ctx = document.getElementById('visitsChart').getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         const chart = new Chart(ctx, {
           type: 'line',
           data: {
